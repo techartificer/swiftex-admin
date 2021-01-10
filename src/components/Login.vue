@@ -13,6 +13,7 @@
               </p>
               <div class="relative mb-4">
                 <input
+                  v-model="phone"
                   type="tel"
                   name="phone"
                   placeholder="Enter your phone number"
@@ -20,24 +21,25 @@
                   border-gray-300
                   focus:border-red-100
                   focus:ring-2 focus:ring-gray-400 text-base outline-none
-                  text-gray-700 py-3 px-3 leading-8 transition-colors
+                  text-gray-700 py-2 px-3 leading-8 transition-colors
                   duration-200 ease-in-out"
                 />
               </div>
               <div class="relative mb-4">
                 <input
+                  v-model="password"
                   type="password"
                   name="password"
                   placeholder="Enter your password"
                   class="w-full bg-ash nm-inset-ash rounded-lg border
                   border-gray-300 focus:border-red-100 focus:ring-2
                   focus:ring-gray-400 text-base outline-none text-gray-700
-                  py-3 px-3 leading-8 transition-colors duration-200
+                  py-2 px-3 leading-8 transition-colors duration-200
                   ease-in-out"
                 />
               </div>
               <button
-                onClick={handleLogin}
+                @click="handleLogin"
                 class="transition duration-300 font-semibold
                 text-black hover:text-ash border-t-2 nm-flat-ash
                 border-0 py-3 px-8 focus:outline-none hover:bg-black
@@ -54,12 +56,34 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+
 export default {
   name: 'Login',
   data() {
     return {
-      counter: 0,
+      phone: '',
+      password: '',
     };
+  },
+  methods: {
+    ...mapActions(['ADMIN_LOGIN_REQUEST', 'REFRESH_TOKEN_REQUEST']),
+    async handleLogin() {
+      try {
+        if (this.phone && this.password) {
+          await this.ADMIN_LOGIN_REQUEST({
+            phone: `88${this.phone}`,
+            password: this.password,
+          });
+        }
+        setTimeout(async () => {
+          await this.REFRESH_TOKEN_REQUEST();
+        }, 1000 * 12);
+        this.$router.push('/dashboard');
+      } catch (err) {
+        // console.log(err);
+      }
+    },
   },
 };
 </script>

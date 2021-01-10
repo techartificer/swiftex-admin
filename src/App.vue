@@ -5,8 +5,11 @@
 </template>
 
 <script>
+/* eslint-disable no-param-reassign */
 import { mapGetters, mapActions } from 'vuex';
 import instance from '@/helpers/axios';
+import constants from '@/constants';
+import validateToken from './helpers/jwt';
 
 export default {
   computed: {
@@ -23,14 +26,46 @@ export default {
   created() {
     instance.defaults.headers.authorization = this.AccessToken;
     instance.defaults.headers.RefreshToken = this.RefreshToken;
-    // this.AUTH_LOGIN_REQUEST({
-    //   phone: '8801521105226',
-    //   password: '@sadat642',
-    // });
+
+    instance.interceptors.request.use(async (config) => {
+      try {
+        const authToken = config?.headers?.authorization;
+        if (authToken) {
+          const isExpired = validateToken(authToken);
+          if (isExpired) {
+            const { accessToken, refreshToken } = await this.REFRESH_TOKEN_REQUEST();
+            config.headers.authorization = accessToken;
+            config.headers.RefreshToken = refreshToken;
+            return config;
+          }
+        }
+        return config;
+      } catch (err) {
+        console.error(err);
+        return Promise.reject(err);
+      }
+    }, undefined);
+
+    instance.interceptors.response.use(undefined, (err) => {
+      const title = err?.response?.data?.title;
+      const code = err?.response?.data?.code;
+
+      if (code === constants.errorCodes.LOGGED_OUT) {
+        console.log(title); // show error title in toast
+      // postLogoutTask();
+      } else if (code === constants.errorCodes.EXPIRED_JWT) {
+      // TODO: refresh token
+      } else {
+        console.log(title, err); // show error title in toast
+      // toast.error(`${title}.`);
+      }
+      return Promise.reject(err);
+    });
   },
   methods: {
-    ...mapActions(['AUTH_LOGIN_REQUEST']),
+    ...mapActions(['REFRESH_TOKEN_REQUEST']),
   },
 };
-// eslint-disable-next-line no-unused-expressions
-<style src="./assets/tailwind.css" />;
+</script>
+
+<style src="./assets/tailwind.css" />
