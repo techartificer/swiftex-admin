@@ -4,8 +4,8 @@ import { baseURL } from '../../constants/api';
 
 export default {
   state: {
-    accessToken: localStorage.getItem('accessToken') || 'asdad',
-    refreshToken: localStorage.getItem('refreshToken') || 'asdas',
+    accessToken: localStorage.getItem('accessToken'),
+    refreshToken: localStorage.getItem('refreshToken'),
   },
   mutations: {
     SET_AUTH_DATA(state, { accessToken, refreshToken, permission }) {
@@ -15,9 +15,15 @@ export default {
       if (refreshToken) { localStorage.setItem('refreshToken', refreshToken); }
       if (permission) { localStorage.setItem('permission', permission); }
     },
+    CLEAR_AUTH_DATA(state) {
+      state.accessToken = null;
+      state.refreshToken = null;
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('permission');
+    },
   },
   actions: {
-    // eslint-disable-next-line no-unused-vars
     async ADMIN_LOGIN_REQUEST({ commit }, payload) {
       try {
         const { data } = await instance.post('/auth/admin/login', payload);
@@ -43,6 +49,16 @@ export default {
         console.log(data?.data);
         commit('SET_AUTH_DATA', data?.data);
         return data?.data;
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    },
+    async LOGOUT_REQUEST({ commit }) {
+      try {
+        await instance.delete('/auth/logout');
+        commit('CLEAR_AUTH_DATA');
+        window.location.replace('/');
+        return 'done';
       } catch (err) {
         return Promise.reject(err);
       }

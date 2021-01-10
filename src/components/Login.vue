@@ -67,7 +67,7 @@ export default {
     };
   },
   methods: {
-    ...mapActions(['ADMIN_LOGIN_REQUEST', 'REFRESH_TOKEN_REQUEST']),
+    ...mapActions(['ADMIN_LOGIN_REQUEST', 'REFRESH_TOKEN_REQUEST', 'LOGOUT_REQUEST']),
     async handleLogin() {
       try {
         if (this.phone && this.password) {
@@ -76,9 +76,12 @@ export default {
             password: this.password,
           });
         }
-        setTimeout(async () => {
-          await this.REFRESH_TOKEN_REQUEST();
-        }, 1000 * 12);
+        // setTimeout(async () => {
+        //   await this.REFRESH_TOKEN_REQUEST();
+        // }, 1000 * 12);
+        // setTimeout(async () => {
+        //   await this.LOGOUT_REQUEST();
+        // }, 1000 * 15);
         this.$router.push('/dashboard');
       } catch (err) {
         // console.log(err);
