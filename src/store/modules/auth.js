@@ -65,7 +65,7 @@ export default {
     },
   },
   getters: {
-    IsLoggedId: (state) => !!state.accessToken && !!state.refreshToken,
+    IsLoggedIn: (state) => !!state.accessToken && !!state.refreshToken,
     AccessToken: (state) => state.accessToken,
     RefreshToken: (state) => state.refreshToken,
   },
