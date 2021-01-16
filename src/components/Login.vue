@@ -66,9 +66,8 @@ export default {
   },
   methods: {
     ...mapActions(['ADMIN_LOGIN_REQUEST', 'REFRESH_TOKEN_REQUEST', 'LOGOUT_REQUEST']),
-    focusEvent(e) {
+    focusEvent() {
       this.prefixText = '+88';
-      console.log(e);
     },
     async handleLogin() {
       try {

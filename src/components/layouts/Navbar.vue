@@ -48,16 +48,45 @@
         icon>
           <v-icon>mdi-bell</v-icon>
         </v-btn>
-        <v-btn
-        class="ml-0 mr-0"
-        color="primary"
+        <v-menu
+        bottom
+        transition="slide-y-transition"
+        offset-y
         rounded
-        text
-        fab
-        small
         >
-        <v-icon >mdi-account</v-icon>
-        </v-btn>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+            class="ml-0 mr-0"
+            color="primary"
+            rounded
+            text
+            fab
+            small
+            v-bind="attrs"
+            v-on="on"
+            >
+              <v-icon >mdi-account</v-icon>
+            </v-btn>
+          </template>
+
+          <v-list
+          dense
+          rounded>
+            <v-list-item
+              v-for="(item, index) in accountItems"
+              :key="index"
+              link
+              @click="$router.push(item.to)"
+            >
+              <v-list-item-icon>
+                <v-icon>{{ item.icon }}</v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>{{ item.title }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-menu>
     </v-app-bar>
   </div>
 </template>
@@ -80,6 +109,10 @@ export default {
       { icon: 'mdi-account-group', title: 'Admin', to: '/admin' },
       { icon: 'mdi-moped', title: 'Rider', to: '/rider' },
       { icon: 'mdi-bike', title: 'Bike', to: '/bike' },
+    ],
+    accountItems: [
+      { icon: 'mdi-account', title: 'Profile', to: '/profile' },
+      { icon: 'mdi-logout', title: 'Logout', to: '/logout' },
     ],
   }),
   created() {
