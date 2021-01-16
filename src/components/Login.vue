@@ -13,21 +13,21 @@
           </div>
           <v-text-field
             autocomplete="off"
-            ref="username"
+            ref="phone"
             :prefix="prefixText"
             @focus="focusEvent"
-            @abort="focusEvent"
+            @blur="focusEvent"
             dense
             outlined
             v-model="phone"
-            :rules="[() => !!phone || 'This field is required']"
-            label="Username"
+            :rules="[() => !!phone || 'This field is required', validatePhoneNumber]"
+            label="Phone"
             type="tel"
             required
           ></v-text-field>
           <v-text-field
             autocomplete="off"
-            ref="name"
+            ref="password"
             dense
             outlined
             v-model="password"
@@ -35,6 +35,7 @@
             label="Password"
             type="password"
             required
+            @keyup.enter="handleLogin"
           ></v-text-field>
           <div class="login">
             <v-btn color="primary"
@@ -53,6 +54,7 @@
 
 <script>
 import { mapActions } from 'vuex';
+import { formatNumber } from '../helpers/phoneNumber';
 
 export default {
   name: 'Login',
@@ -64,26 +66,47 @@ export default {
       isLoading: false,
     };
   },
+  computed: {
+    loginForm() {
+      return {
+        password: this.password,
+        phone: this.phone,
+      };
+    },
+    validatePhoneNumber() {
+      const { isValid } = formatNumber(`+88${this.phone}`);
+      if (!isValid) return 'Phone number should be valid';
+      return true;
+    },
+  },
   methods: {
     ...mapActions(['ADMIN_LOGIN_REQUEST', 'REFRESH_TOKEN_REQUEST', 'LOGOUT_REQUEST']),
-    focusEvent() {
-      this.prefixText = '+88';
+    focusEvent(e) {
+      if (e.type === 'blur' && !this.phone) {
+        this.prefixText = '';
+      } else {
+        this.prefixText = '+88';
+      }
+    },
+    validdateLoginForm() {
+      let formHasErrors = false;
+      Object.keys(this.loginForm).forEach((f) => {
+        if (!this.loginForm[f]) formHasErrors = true;
+        this.$refs[f].validate(true);
+      });
+      return formHasErrors;
     },
     async handleLogin() {
       try {
         this.isLoading = true;
-        if (this.phone && this.password) {
+        const { number, isValid } = formatNumber(`+88${this.phone}`);
+        const v = this.validdateLoginForm();
+        if (this.phone && this.password && !v && isValid) {
           await this.ADMIN_LOGIN_REQUEST({
-            phone: `88${this.phone}`,
+            phone: number,
             password: this.password,
           });
         }
-        // setTimeout(async () => {
-        //   await this.REFRESH_TOKEN_REQUEST();
-        // }, 1000 * 12);
-        // setTimeout(async () => {
-        //   await this.LOGOUT_REQUEST();
-        // }, 1000 * 15);
       } catch (err) {
         // console.log(err);
       }
@@ -102,4 +125,3 @@ img.log-img {
     height: 70px;
 }
 </style>
-// https://vuejsexamples.com/tag/notification/
