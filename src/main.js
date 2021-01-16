@@ -27,7 +27,8 @@ instance.interceptors.request.use(async (config) => {
     if (authToken) {
       const isExpired = validateToken(authToken);
       if (isExpired) {
-        const { accessToken, refreshToken } = await this.REFRESH_TOKEN_REQUEST();
+        console.log(store);
+        const { accessToken, refreshToken } = await store.dispatch('REFRESH_TOKEN_REQUEST');
         config.headers.authorization = accessToken;
         config.headers.RefreshToken = refreshToken;
         return config;
@@ -46,7 +47,8 @@ instance.interceptors.response.use(undefined, (err) => {
   console.log(err.config);
   if (code === constants.errorCodes.LOGGED_OUT) {
     Vue.$toast.error(title);
-    // clear localstorage
+    store.commit('CLEAR_AUTH_DATA');
+    window.location.replace('/');
   } else {
     Vue.$toast.error(title);
     console.log(title, err); // show error title in toast
