@@ -1,16 +1,13 @@
 <template>
 <v-app>
     <!-- <Snackbar /> -->
-    <Navbar />
+    <Navbar v-if="IsLoggedIn"/>
     <v-main>
       <v-container fluid class="pa-0">
-        <!-- <router-view></router-view> -->
+        <router-view></router-view>
       </v-container>
     </v-main>
   </v-app>
-  <!-- <div id="app">
-    <router-view />
-  </div> -->
 </template>
 
 <script>
@@ -26,7 +23,7 @@ export default {
     Navbar,
   },
   computed: {
-    ...mapGetters(['AccessToken', 'RefreshToken']),
+    ...mapGetters(['AccessToken', 'RefreshToken', 'IsLoggedIn']),
   },
   watch: {
     AccessToken(val) {

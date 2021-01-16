@@ -25,36 +25,13 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <v-bottom-navigation
-      fixed
-      v-if="isMobile"
-    >
-      <v-btn
-        @click="showCart"
-        text
-        large
-        color="primary"
-      >
-        <v-icon class="pr-1">mdi-cart</v-icon>
-      </v-btn>
-      <v-badge
-        v-if="isMobile && cartItemCount"
-        overlap
-        :content="cartItemCount"
-        class="my-3 badge-fix mr-5"
-      >
-      </v-badge>
-        <div class="place-order">
-        <span class="text-fix">Place Order</span>
-        </div>
-    </v-bottom-navigation>
     <v-app-bar
       app
       clipped-left
       flat
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title v-if="!isMobile" @click="goToHome">
+      <v-toolbar-title  @click="goToHome">
           <img src="../../assets/logo.png" alt="Logo"
           class="logo">
       </v-toolbar-title>
@@ -67,14 +44,15 @@
         class="ml-0 mr-1"
         color="primary"
         rounded
-        text="true"
-        icon="true">
+        text
+        icon>
           <v-icon>mdi-bell</v-icon>
         </v-btn>
         <v-btn
         class="ml-0 mr-0"
         color="primary"
         rounded
+        text
         fab
         small
         >
@@ -85,18 +63,10 @@
 </template>
 
 <script>
-import { mapGetters, mapActions, mapMutations } from 'vuex';
-// import Login from '../auth/Login.vue';
-// import { eventBus } from '../../lib/helper';
-// import event from '../../constant/event';
-// import CartDrawer from '../cart/Drawer.vue';
-// import ProductCard from '../home/PorductCard.vue';
+import { mapGetters } from 'vuex';
 
 export default {
   components: {
-    // Login,
-    // CartDrawer,
-    // ProductCard,
   },
   data: () => ({
     isSearching: false,
@@ -112,26 +82,12 @@ export default {
       { icon: 'mdi-bike', title: 'Bike', to: '/bike' },
     ],
   }),
-  watch: {
-    searchItem(val) {
-      if (!val) {
-        this.isSearching = false;
-        this.makeEmptySearchProduct();
-      }
-    },
-  },
   created() {
     this.$vuetify.theme.dark = false;
     this.initialize();
   },
   computed: {
-    ...mapGetters(['isLoggedIn', 'profile', 'cartProducts', 'searchedProducts']),
-    // cartItemCount() {
-    //   return this.cartProducts.length;
-    // },
-    totalPrice() {
-      return this.cartProducts.reduce((sum, p) => sum + p.price * p.quantity, 0);
-    },
+    ...mapGetters(['isLoggedIn']),
     isMobile() {
       // eslint-disable-next-line default-case
       switch (this.$vuetify.breakpoint.name) {
@@ -149,32 +105,10 @@ export default {
       return this.profile.name.substr(0, 10);
     },
   },
-  beforeDestroy() {
-    if (this.timeoutId) {
-      clearTimeout(this.timeoutId);
-    }
-  },
   methods: {
-    ...mapActions(['PRODUCTS', 'SEARCH_PRODUCT']),
-    ...mapMutations(['makeEmptySearchProduct']),
-    searchProduct() {
-      this.isSearching = true;
-      if (this.timeoutId) {
-        clearTimeout(this.timeoutId);
-      }
-      if (this.searchItem.length > 2) {
-        this.timeoutId = setTimeout(async () => {
-          try {
-            await this.SEARCH_PRODUCT(this.searchItem);
-            this.isSearching = false;
-          } catch (err) {
-            this.isSearching = false;
-          }
-        }, 1000);
-      }
-    },
+
     async initialize() {
-      await Promise.all([this.PRODUCTS()]);
+      return true;
     },
     goToHome() {
       this.searchItem = '';
@@ -183,34 +117,10 @@ export default {
         this.$router.push('/');
       }
     },
-    goToProfile() {
-      this.searchItem = '';
-      this.makeEmptySearchProduct();
-      if (this.$route.path !== '/profile') {
-        this.$router.push('/profile');
-      }
-    },
-    showCart() {
-      this.searchItem = '';
-      this.makeEmptySearchProduct();
-      // eventBus.$emit(event.cartDrawerInit);
-    },
-    loginInit() {
-      this.searchItem = '';
-      this.makeEmptySearchProduct();
-      // eventBus.$emit(event.loginInit);
-    },
   },
 };
 </script>
 <style lang="scss" scoped>
-.search-items {
-    position: absolute;
-    margin-top: 440px;
-    background: #fff;
-    width: 100%;
-    margin-left: -16px;
-}
 .v-bottom-navigation.v-item-group.theme--light.v-bottom-navigation--fixed {
     display: flex;
     justify-content: flex-end;
@@ -256,7 +166,8 @@ span.light {
     padding: 14px;
 }
 img.logo {
-    height: 35px;
+  margin-left: -20px;
+    height: 50px;
     margin-top: 10px;
     cursor: pointer;
 }
