@@ -6,11 +6,13 @@ export default {
   state: {
     accessToken: localStorage.getItem('accessToken'),
     refreshToken: localStorage.getItem('refreshToken'),
+    permission: localStorage.getItem('permission'),
   },
   mutations: {
     SET_AUTH_DATA(state, { accessToken, refreshToken, permission }) {
       state.accessToken = accessToken;
       state.refreshToken = refreshToken;
+      state.permission = permission;
       if (accessToken) { localStorage.setItem('accessToken', accessToken); }
       if (refreshToken) { localStorage.setItem('refreshToken', refreshToken); }
       if (permission) { localStorage.setItem('permission', permission); }
@@ -27,7 +29,6 @@ export default {
     async ADMIN_LOGIN_REQUEST({ commit }, payload) {
       try {
         const { data } = await instance.post('/auth/admin/login', payload);
-        console.log(data?.data);
         commit('SET_AUTH_DATA', data?.data);
         return data;
       } catch (err) {
@@ -46,7 +47,6 @@ export default {
             RefreshToken: `${state.refreshToken}`,
           },
         });
-        console.log(data?.data);
         commit('SET_AUTH_DATA', data?.data);
         return data?.data;
       } catch (err) {
@@ -68,5 +68,6 @@ export default {
     IsLoggedIn: (state) => !!state.accessToken && !!state.refreshToken,
     AccessToken: (state) => state.accessToken,
     RefreshToken: (state) => state.refreshToken,
+    Permission: (state) => state.permission,
   },
 };

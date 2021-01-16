@@ -93,6 +93,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import constants from '../../constants';
+import permission from '../../constants/permission';
 
 export default {
   components: {
@@ -103,13 +105,6 @@ export default {
     timeoutId: null,
     drawer: true,
     bottomNav: true,
-    items: [
-      { icon: 'mdi-view-dashboard', title: 'Dashboard', to: '/' },
-      { icon: 'mdi-format-list-checks', title: 'Order', to: '/orders' },
-      { icon: 'mdi-account-group', title: 'Admin', to: '/admin' },
-      { icon: 'mdi-moped', title: 'Rider', to: '/rider' },
-      { icon: 'mdi-bike', title: 'Bike', to: '/bike' },
-    ],
     accountItems: [
       { icon: 'mdi-account', title: 'Profile', to: '/profile' },
       { icon: 'mdi-logout', title: 'Logout', to: '/logout' },
@@ -120,7 +115,20 @@ export default {
     this.initialize();
   },
   computed: {
-    ...mapGetters(['isLoggedIn']),
+    ...mapGetters(['IsLoggedIn', 'Permission']),
+    items() {
+      switch (this.Permission) {
+        case constants.adminRoles.SUPER_ADMIN:
+          return permission.superAdmin;
+        case constants.adminRoles.ADMIN:
+          return permission.admin;
+        case constants.adminRoles.MODERATOR:
+          return permission.moderator;
+        default:
+          break;
+      }
+      return permission.common;
+    },
     isMobile() {
       // eslint-disable-next-line default-case
       switch (this.$vuetify.breakpoint.name) {

@@ -1,6 +1,5 @@
 <template>
 <v-app>
-    <!-- <Snackbar /> -->
     <Navbar v-if="IsLoggedIn"/>
     <v-main>
       <v-container fluid class="pa-0">
@@ -62,12 +61,8 @@ export default {
 
       if (code === constants.errorCodes.LOGGED_OUT) {
         console.log(title); // show error title in toast
-      // postLogoutTask();
-      } else if (code === constants.errorCodes.EXPIRED_JWT) {
-      // TODO: refresh token
       } else {
         console.log(title, err); // show error title in toast
-      // toast.error(`${title}.`);
       }
       return Promise.reject(err);
     });
