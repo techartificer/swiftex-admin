@@ -14,7 +14,7 @@
           v-for="item in items"
           :key="item.title"
           link
-          @click="$router.push(item.to)"
+          @click="goToRoute(item.to)"
         >
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
@@ -76,7 +76,7 @@
               v-for="(item, index) in accountItems"
               :key="index"
               link
-              @click="$router.push(item.to)"
+              @click="goToRoute(item.to)"
             >
               <v-list-item-icon>
                 <v-icon>{{ item.icon }}</v-icon>
@@ -143,9 +143,12 @@ export default {
     async initialize() {
       return true;
     },
+    goToRoute(r) {
+      if (this.$route.path !== r) {
+        this.$router.push(r);
+      }
+    },
     goToHome() {
-      this.searchItem = '';
-      this.makeEmptySearchProduct();
       if (this.$route.path !== '/') {
         this.$router.push('/');
       }

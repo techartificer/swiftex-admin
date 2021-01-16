@@ -12,13 +12,18 @@ const routes = [
     component: Home,
   },
   {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: () => import('../views/Dashboard.vue'),
+    path: '/logout',
+    name: 'Logout',
+    component: () => import('../views/Logout.vue'),
     meta: {
       requiresAuth: true,
     },
   },
+  // {
+  //   path: '/*',
+  //   name: '404',
+  //   redirect: '/',
+  // },
 ];
 
 const router = new VueRouter({
