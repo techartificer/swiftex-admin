@@ -251,7 +251,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['ALL_ADMINS_REQUEST']),
+    ...mapActions(['ALL_ADMINS_REQUEST', 'ADD_ADMIN_REQUEST']),
     async initialize() {
       try {
         await this.ALL_ADMINS_REQUEST();
@@ -292,13 +292,21 @@ export default {
         this.editedIndex = -1;
       });
     },
-
+    async addAdmin(admin) {
+      try {
+        // eslint-disable-next-line no-param-reassign
+        admin.phone = `88${admin.phone}`;
+        await this.ADD_ADMIN_REQUEST(admin);
+        this.$toast.success('Admin added successfully');
+      } catch (err) {
+        // console.log(err);
+      }
+    },
     save() {
       if (this.editedIndex > -1) {
         Object.assign(this.Admins[this.editedIndex], this.editedItem);
       } else {
-        console.log(this.editedItem);
-        this.Admins.push(this.editedItem);
+        this.addAdmin(this.editedItem);
       }
       this.close();
     },
