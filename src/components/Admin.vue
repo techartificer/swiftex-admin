@@ -1,6 +1,7 @@
 <template>
   <div class="pa-5">
     <v-data-table
+    :loading="isLoading"
     :headers="headers"
     :items="Admins"
     sort-by="calories"
@@ -193,6 +194,7 @@ import constants from '../constants';
 
 export default {
   data: () => ({
+    isLoading: false,
     dialog: false,
     dialogDelete: false,
     statusItems: ['Active', 'Deactive'],
@@ -251,13 +253,15 @@ export default {
   },
 
   methods: {
-    ...mapActions(['ALL_ADMINS_REQUEST', 'ADD_ADMIN_REQUEST']),
+    ...mapActions(['ALL_ADMINS_REQUEST', 'ADD_ADMIN_REQUEST', 'UPDATE_ADMIN_REQUEST']),
     async initialize() {
+      this.isLoading = true;
       try {
         await this.ALL_ADMINS_REQUEST();
       } catch (err) {
         // console.log(err);
       }
+      this.isLoading = false;
     },
 
     editItem(item) {
@@ -304,7 +308,9 @@ export default {
     },
     save() {
       if (this.editedIndex > -1) {
-        Object.assign(this.Admins[this.editedIndex], this.editedItem);
+        const id = this.Admins[this.editedIndex]?.id;
+        this.UPDATE_ADMIN_REQUEST({ id, updatedData: this.editedItem });
+        this.$toast.success('Admin updated successfully');
       } else {
         this.addAdmin(this.editedItem);
       }

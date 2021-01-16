@@ -44,14 +44,12 @@ instance.interceptors.request.use(async (config) => {
 instance.interceptors.response.use(undefined, (err) => {
   const title = err?.response?.data?.title;
   const code = err?.response?.data?.code;
-  console.log(err.config);
   if (code === constants.errorCodes.LOGGED_OUT) {
     Vue.$toast.error(title);
     store.commit('CLEAR_AUTH_DATA');
     window.location.replace('/');
   } else {
     Vue.$toast.error(title);
-    console.log(title, err); // show error title in toast
   }
   return Promise.reject(err);
 });
