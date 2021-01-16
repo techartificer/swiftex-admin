@@ -1,7 +1,16 @@
 <template>
-  <div id="app">
+<v-app>
+    <!-- <Snackbar /> -->
+    <Navbar />
+    <v-main>
+      <v-container fluid class="pa-0">
+        <!-- <router-view></router-view> -->
+      </v-container>
+    </v-main>
+  </v-app>
+  <!-- <div id="app">
     <router-view />
-  </div>
+  </div> -->
 </template>
 
 <script>
@@ -9,9 +18,13 @@
 import { mapGetters, mapActions } from 'vuex';
 import instance from '@/helpers/axios';
 import constants from '@/constants';
+import Navbar from '@/components/layouts/Navbar.vue';
 import validateToken from './helpers/jwt';
 
 export default {
+  components: {
+    Navbar,
+  },
   computed: {
     ...mapGetters(['AccessToken', 'RefreshToken']),
   },
@@ -67,5 +80,3 @@ export default {
   },
 };
 </script>
-
-<style src="./assets/tailwind.css" />
