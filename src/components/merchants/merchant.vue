@@ -23,7 +23,6 @@
         </v-toolbar>
       </template>
       <template v-slot:item.createdAt="{ item }">
-        <!-- {{moment(item.createdAt)}} -->
         {{getDate(item.createdAt)}}
       </template>
       <template v-slot:item.status="{ item }">

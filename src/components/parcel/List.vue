@@ -4,8 +4,25 @@
       <add-parcel v-if="showAddPercel"/>
     </transition>
     <template v-if="!showAddPercel">
-    <transition name="fade">
-      <v-card
+      <v-data-table
+        :headers="headers"
+        :items="Orders"
+        class="elevation-0"
+        :loading="isInit"
+      >
+        <template v-slot:top>
+        <v-toolbar
+          flat
+        >
+          <v-toolbar-title>Orders</v-toolbar-title>
+          <v-divider
+            class="mx-4"
+            inset
+            vertical
+          ></v-divider>
+          <v-spacer></v-spacer>
+        </v-toolbar>
+        <v-card
       class="mr-2 mb-8"
       outlined>
         <v-card-text>
@@ -92,14 +109,7 @@
           </v-row>
         </v-card-text>
       </v-card>
-      </transition>
-
-      <v-data-table
-        :headers="headers"
-        :items="Orders"
-        class="elevation-0"
-        :loading="isInit"
-      >
+      </template>
         <template v-slot:item.recipientPhone="{ item }">
           {{item.recipientPhone.substr(2)}}
         </template>
@@ -173,8 +183,8 @@
 import { mapActions, mapGetters } from 'vuex';
 import moment from 'moment';
 import AddParcel from './Add.vue';
-import eventBus from '../../helpers/eventBus';
-import constants from '../../constants';
+// import eventBus from '../../helpers/eventBus';
+// import constants from '../../constants';
 
 export default {
   components: {
@@ -195,7 +205,7 @@ export default {
     isSearched: false,
   }),
   computed: {
-    ...mapGetters(['Orders', 'CurrentShop']),
+    ...mapGetters(['Orders']),
     searchDisabled() {
       return !this.phone && !this.trackId && this.dates.length !== 2;
     },
@@ -236,14 +246,11 @@ export default {
   },
   mounted() {
     this.intialize();
-    eventBus.$on(constants.events.SHOW_ADD_PERCEL_DIALOG, (flag) => {
-      this.showAddPercel = flag;
-    });
+    // eventBus.$on(constants.events.SHOW_ADD_PERCEL_DIALOG, (flag) => {
+    //   this.showAddPercel = flag;
+    // });
   },
   watch: {
-    CurrentShop() {
-      this.intialize();
-    },
     allEmpty(val) {
       if (val) {
         this.intialize();
@@ -260,7 +267,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['ORDERS_REQUEST']),
+    ...mapActions(['ORDERS']),
     addPercelInit() {
       this.showAddPercel = true;
     },
@@ -270,7 +277,6 @@ export default {
     async searchHandle() {
       this.isSearched = true;
       this.searchInit = true;
-      if (!this.CurrentShop) return;
       try {
         let startDate;
         let endDate;
@@ -282,8 +288,7 @@ export default {
           startDate = new Date(startDateTS).setHours(0, 0, 0, 0);
           endDate = new Date(endDateTS).setHours(23, 59, 59);
         }
-        await this.ORDERS_REQUEST({
-          shopId: this.CurrentShop.id,
+        await this.ORDERS({
           phone: this.phone,
           trackId: this.trackId,
           startDate,
@@ -304,12 +309,8 @@ export default {
       this.isSearched = false;
     },
     async intialize() {
-      if (!this.CurrentShop) {
-        this.isInit = false;
-        return;
-      }
       try {
-        await this.ORDERS_REQUEST({ shopId: this.CurrentShop.id });
+        await this.ORDERS({});
       } catch (err) {
         // err
       }
