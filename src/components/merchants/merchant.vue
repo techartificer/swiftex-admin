@@ -8,6 +8,7 @@
     class="elevation-0"
     hide-default-footer
     :items-per-page="1000000"
+    dense
   >
       <template v-slot:top>
         <v-toolbar
@@ -27,6 +28,8 @@
       </template>
       <template v-slot:item.status="{ item }">
         <v-switch
+        dense
+
         color="success"
         v-model="item.status"
         @change="(c) => changeStatus(c, item)"

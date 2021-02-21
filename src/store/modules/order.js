@@ -11,7 +11,7 @@ export default {
   },
   actions: {
     // eslint-disable-next-line no-unused-vars
-    async ORDERS({ commit }, payload) {
+    async ORDERS({ commit }, payload = {}) {
       try {
         const {
           lastId = '', shopId = '', phone = '', trackId = '', startDate = '', endDate = '',

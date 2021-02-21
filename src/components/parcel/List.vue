@@ -9,6 +9,8 @@
         :items="Orders"
         class="elevation-0"
         :loading="isInit"
+        :items-per-page="1000000"
+        hide-default-footer
       >
         <template v-slot:top>
         <v-toolbar
@@ -167,7 +169,7 @@
           </v-icon>
         </template>
       </v-data-table>
-      <div class="text-center pt-2">
+      <div class="text-center pt-2 mb-8">
         <v-btn
         :disabled="!hasMore"
         color="secondary"
@@ -183,8 +185,8 @@
 import { mapActions, mapGetters } from 'vuex';
 import moment from 'moment';
 import AddParcel from './Add.vue';
-// import eventBus from '../../helpers/eventBus';
-// import constants from '../../constants';
+import eventBus from '../../helpers/eventBus';
+import constants from '../../constants';
 
 export default {
   components: {
@@ -246,9 +248,9 @@ export default {
   },
   mounted() {
     this.intialize();
-    // eventBus.$on(constants.events.SHOW_ADD_PERCEL_DIALOG, (flag) => {
-    //   this.showAddPercel = flag;
-    // });
+    eventBus.$on(constants.events.SHOW_ADD_PERCEL_DIALOG, (flag) => {
+      this.showAddPercel = flag;
+    });
   },
   watch: {
     allEmpty(val) {
@@ -310,7 +312,7 @@ export default {
     },
     async intialize() {
       try {
-        await this.ORDERS({});
+        await this.ORDERS();
       } catch (err) {
         // err
       }
