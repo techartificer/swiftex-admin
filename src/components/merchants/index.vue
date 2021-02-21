@@ -20,6 +20,10 @@
           <v-spacer></v-spacer>
         </v-toolbar>
       </template>
+      <template v-slot:item.createdAt="{ item }">
+        <!-- {{moment(item.createdAt)}} -->
+        {{getDate(item.createdAt)}}
+      </template>
       <template v-slot:item.status="{ item }">
         <v-switch
         color="success"
@@ -48,17 +52,21 @@
       <v-btn
       rounded
       depressed
+      :loading="isLoadingMore"
+      @click="loadMore"
       >Load More</v-btn>
     </div>
 </div>
 </template>
 <script>
+import moment from 'moment';
 import { mapActions, mapGetters } from 'vuex';
 
 export default {
   data: () => ({
     editedItem: {},
     isLoading: true,
+    isLoadingMore: false,
   }),
   computed: {
     ...mapGetters(['merchants']),
@@ -72,6 +80,7 @@ export default {
         },
         { text: 'Phone', value: 'phone' },
         { text: 'Email', value: 'email' },
+        { text: 'Registered at', value: 'createdAt' },
         { text: 'Status', value: 'status' },
         { text: 'Actions', value: 'actions', sortable: false },
       ];
@@ -82,12 +91,16 @@ export default {
   },
   methods: {
     ...mapActions(['MERCHANTS']),
+    getDate(date) {
+      return moment(date).format('DD, MMM YYYY HH:MM A');
+    },
     changeStatus(c, item) {
       console.log(c, item.id);
       // TODO: implement deactive merchant
     },
     loadMore() {
-      const id = this.merchants[this.merchants?.length - 3];
+      this.isLoadingMore = true;
+      const id = this.merchants[this.merchants?.length - 3]?.id;
       this.initialize(id);
     },
     async initialize(lastId = '') {
@@ -98,6 +111,7 @@ export default {
         // err
       }
       this.isLoading = false;
+      this.isLoadingMore = false;
     },
   },
 
