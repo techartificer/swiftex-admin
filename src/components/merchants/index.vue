@@ -6,6 +6,8 @@
     :items="merchants"
     sort-by="calories"
     class="elevation-0"
+    hide-default-footer
+    :items-per-page="1000000"
   >
       <template v-slot:top>
         <v-toolbar
@@ -34,7 +36,7 @@
       <template v-slot:item.actions="{ item }">
         <v-icon
           class="ml-2"
-          @click="editItem(item)"
+          @click="viewMerchant(item)"
         >
           mdi-eye
         </v-icon>
@@ -54,6 +56,7 @@
       depressed
       :loading="isLoadingMore"
       @click="loadMore"
+      :disabled="disableLoadMore"
       >Load More</v-btn>
     </div>
 </div>
@@ -67,6 +70,7 @@ export default {
     editedItem: {},
     isLoading: true,
     isLoadingMore: false,
+    disableLoadMore: false,
   }),
   computed: {
     ...mapGetters(['merchants']),
@@ -100,13 +104,19 @@ export default {
     },
     loadMore() {
       this.isLoadingMore = true;
-      const id = this.merchants[this.merchants?.length - 3]?.id;
+      const id = this.merchants[this.merchants?.length - 1]?.id;
       this.initialize(id);
+    },
+    viewMerchant(merchant) {
+      console.log(merchant);
     },
     async initialize(lastId = '') {
       try {
         this.isLoading = true;
-        await this.MERCHANTS({ lastId });
+        const data = await this.MERCHANTS({ lastId });
+        if (data?.length < 15) {
+          this.disableLoadMore = true;
+        }
       } catch (err) {
         // err
       }
