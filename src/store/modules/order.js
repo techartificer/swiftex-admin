@@ -14,7 +14,6 @@ export default {
     async ORDERS({ commit }, payload) {
       try {
         const { data } = await instance.get('/order/');
-        console.log(data.data);
         commit('setOrders', data.data);
         return data.data;
       } catch (err) {
