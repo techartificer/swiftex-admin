@@ -27,6 +27,14 @@ const routes = [
       requiresAuth: true,
     },
   },
+  {
+    path: '/merchant',
+    name: 'Merchant',
+    component: () => import('../views/Merchant.vue'),
+    meta: {
+      requiresAuth: true,
+    },
+  },
   // {
   //   path: '/*',
   //   name: '404',

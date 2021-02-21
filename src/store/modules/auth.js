@@ -12,10 +12,12 @@ export default {
     SET_AUTH_DATA(state, { accessToken, refreshToken, permission }) {
       state.accessToken = accessToken;
       state.refreshToken = refreshToken;
-      state.permission = permission;
       if (accessToken) { localStorage.setItem('accessToken', accessToken); }
       if (refreshToken) { localStorage.setItem('refreshToken', refreshToken); }
-      if (permission) { localStorage.setItem('permission', permission); }
+      if (permission) {
+        state.permission = permission;
+        localStorage.setItem('permission', permission);
+      }
     },
     CLEAR_AUTH_DATA(state) {
       state.accessToken = null;
