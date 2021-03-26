@@ -16,7 +16,7 @@ export default {
     async RIDERS({ commit }, payload = {}) {
       try {
         const { lastId } = payload;
-        const { data } = instance.get(`rider?lastId=${lastId}`);
+        const { data } = await instance.get(`rider?lastId=${lastId}`);
         if (!lastId) {
           commit('setRiders', data.data);
         } else commit('addRiders', data.data);
