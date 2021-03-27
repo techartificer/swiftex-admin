@@ -8,9 +8,21 @@ export default {
     setOrders(state, payload) {
       state.orders = payload;
     },
+    addOrderStatus(state, payload) {
+      console.log(payload);
+    },
   },
   actions: {
-    // eslint-disable-next-line no-unused-vars
+    async ADD_ORDER_STATUS({ commit, rootState }, payload = {}) {
+      try {
+        const body = { ...payload, admin: rootState?.admin?.profile?.id };
+        const { data } = await instance.patch(`/order/add/order-status/${payload.id}`, body);
+        commit('addOrderStatus', data.data);
+        return data.data;
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    },
     async ORDERS({ commit }, payload = {}) {
       try {
         const {

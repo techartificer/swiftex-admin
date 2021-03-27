@@ -92,7 +92,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import constants from '../../constants';
 import permission from '../../constants/permission';
 
@@ -147,8 +147,13 @@ export default {
     },
   },
   methods: {
-
+    ...mapActions(['ADMIN_PROFILE_REQUEST']),
     async initialize() {
+      try {
+        await this.ADMIN_PROFILE_REQUEST();
+      } catch (err) {
+        // err
+      }
       return true;
     },
     goToRoute(r) {

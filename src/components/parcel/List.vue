@@ -57,7 +57,7 @@
                 </div>
               </div>
 
-              <v-row class="mt-1" v-if="isValidStatus">
+              <v-row class="mt-5" v-if="isValidStatus">
                 <v-col cols="md-4">
                   <v-autocomplete
                   outlined
@@ -92,10 +92,10 @@
             <v-btn @click="closeModal"
             color="gray"
             text>Cancel</v-btn>
-            <v-btn
+            <!-- <v-btn
             color="secondary">
               Update
-            </v-btn>
+            </v-btn> -->
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -241,11 +241,11 @@
         </template>
         <template v-slot:item.deliverdAt="{ item }">
           <v-chip
-            :color="getDeliveredAt(item.deliverdAt).color"
+            :color="getDeliveredAt(item.deliveredAt).color"
             dark
             small
           >
-          {{getDeliveredAt(item.deliverdAt).time}}
+          {{getDeliveredAt(item.deliveredAt).time}}
           </v-chip>
         </template>
         <template v-slot:item.actions="{ item }">
@@ -363,6 +363,9 @@ export default {
     });
   },
   watch: {
+    async currentStatus() {
+      await this.addOrderStatus();
+    },
     allEmpty(val) {
       if (val) {
         this.intialize();
@@ -379,7 +382,20 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['ORDERS', 'SHOP_BY_ID']),
+    ...mapActions(['ORDERS', 'SHOP_BY_ID', 'ADD_ORDER_STATUS']),
+    async addOrderStatus() {
+      if (this.currentStatus === this.dialogOrder.currentStatus
+       || this.currentStatus === constants.ORDER_STATUS.CREATED) return;
+      try {
+        await this.ADD_ORDER_STATUS({
+          id: this.dialogOrder.id,
+          text: 'Test text',
+          status: this.currentStatus,
+        });
+      } catch (err) {
+        // err
+      }
+    },
     addPercelInit() {
       this.showAddPercel = true;
     },
@@ -449,10 +465,9 @@ export default {
       return 'N/A';
     },
     getDeliveredAt(t) {
-      // const constDate = '0001-01-01T00:00:00Z';
-      if (t && new Date(t) > new Date('2020-12-31 00:00:00')) {
+      if (t) {
         return {
-          time: moment(t).format('DD MMM YYYY'),
+          time: moment(t).format('DD MMM YYYY').toString(),
           color: 'success',
         };
       }
