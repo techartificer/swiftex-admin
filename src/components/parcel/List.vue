@@ -74,7 +74,8 @@
                   dense
                   label="Select Rider"
                   v-model="selectedRider"
-                  :items="hubs"
+                  item-text="name"
+                  :items="riders"
                   ></v-autocomplete>
                 </v-col>
                 <v-col cols="md-2">
@@ -307,6 +308,7 @@ export default {
     riderHub: null,
     orderStatus: Object.values(constants.ORDER_STATUS),
     currentStatus: null,
+    riders: [],
   }),
   computed: {
     ...mapGetters(['Orders']),
@@ -380,9 +382,12 @@ export default {
     dates() {
       this.trackId = '';
     },
+    async riderHub() {
+      await this.fetchRidersByHub();
+    },
   },
   methods: {
-    ...mapActions(['ORDERS', 'SHOP_BY_ID', 'ADD_ORDER_STATUS']),
+    ...mapActions(['ORDERS', 'SHOP_BY_ID', 'ADD_ORDER_STATUS', 'RIDERS_BY_HUB']),
     async addOrderStatus() {
       if (this.currentStatus === this.dialogOrder.currentStatus
        || this.currentStatus === constants.ORDER_STATUS.CREATED) return;
@@ -392,6 +397,13 @@ export default {
           text: 'Test text',
           status: this.currentStatus,
         });
+      } catch (err) {
+        // err
+      }
+    },
+    async fetchRidersByHub() {
+      try {
+        this.riders = await this.RIDERS_BY_HUB(this.riderHub);
       } catch (err) {
         // err
       }

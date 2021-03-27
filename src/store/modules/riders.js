@@ -13,6 +13,15 @@ export default {
     },
   },
   actions: {
+    // eslint-disable-next-line no-unused-vars
+    async RIDERS_BY_HUB({ commit }, hub = '') {
+      try {
+        const { data } = await instance.get(`rider/${hub}`);
+        return data.data;
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    },
     async RIDERS({ commit }, payload = {}) {
       try {
         const { lastId } = payload;
