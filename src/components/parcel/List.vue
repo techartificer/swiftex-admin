@@ -4,6 +4,76 @@
       <add-parcel v-if="showAddPercel"/>
     </transition>
     <template v-if="!showAddPercel">
+      <v-dialog
+      class="mx-auto"
+      width="900"
+      persistent
+      v-model="showOrder">
+        <v-card>
+          <v-card-title>
+            Order
+          </v-card-title>
+          <v-card-text>
+            <div v-if=" dialogOrder && dialogOrder.shop">
+              Status: {{ dialogOrder.currentStatus }}
+              Shop Name: {{ dialogOrder.shop.name }}
+              Pickup area: {{ dialogOrder.shop.pickupArea }}
+              Address: {{ dialogOrder.shop.address }}
+
+              Recipient Name: {{ dialogOrder.recipientName }}
+              Recipient Phone: {{ dialogOrder.recipientPhone }}
+              Recipient Area: {{ dialogOrder.recipientArea }}
+              Recipient Address: {{ dialogOrder.recipientCity }}
+              Recipient Name: {{ dialogOrder.recipientCity }}
+              Number of Items: {{ dialogOrder.numberOfItems }}
+              Parcel Type: {{ dialogOrder.percelType }}
+              Delivery Type: {{ dialogOrder.deliveryType }}
+              Payment: {{ dialogOrder.price }}
+              Payment Type: {{ dialogOrder.paymentStatus }}
+              Delivery Time: {{ dialogOrder.requestedDeliveryTime }}
+
+              <v-row class="mt-1">
+                <v-col cols="md-4">
+                  <v-autocomplete
+                  outlined
+                  dense
+                  label="Select Hub"
+                  v-model="riderHub"
+                  :items="hubs"
+                  ></v-autocomplete>
+                </v-col>
+                <v-col>
+                  <v-autocomplete
+                  :disabled="!riderHub"
+                  outlined
+                  dense
+                  label="Select Rider"
+                  v-model="selectedRider"
+                  :items="hubs"
+                  ></v-autocomplete>
+                </v-col>
+                <v-col cols="md-2">
+                  <v-btn
+                  class="pa-5"
+                  depressed
+                  color="primary"
+                  >Assign</v-btn>
+                </v-col>
+              </v-row>
+            </div>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn @click="closeModal"
+            color="gray"
+            text>Cancel</v-btn>
+            <v-btn
+            color="secondary">
+              Update
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
       <v-data-table
         :headers="headers"
         :items="Orders"
@@ -193,6 +263,7 @@ export default {
     AddParcel,
   },
   data: () => ({
+    showOrder: false,
     showAddPercel: false,
     phone: '',
     trackId: '',
@@ -205,6 +276,10 @@ export default {
     itemsPerPage: 10,
     searchInit: false,
     isSearched: false,
+    dialogOrder: {},
+    hubs: constants.COVERAGE_AREAS,
+    selectedRider: null,
+    riderHub: null,
   }),
   computed: {
     ...mapGetters(['Orders']),
@@ -269,12 +344,26 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['ORDERS']),
+    ...mapActions(['ORDERS', 'SHOP_BY_ID']),
     addPercelInit() {
       this.showAddPercel = true;
     },
-    viewPercel(item) {
-      console.log(item);
+    async viewPercel(item) {
+      try {
+        // TODO: isFetching loader in modal
+        this.showOrder = true;
+        const shop = await this.SHOP_BY_ID(item.shopId);
+        this.dialogOrder = item;
+        this.dialogOrder.shop = shop;
+        console.log(this.dialogOrder);
+      } catch (err) {
+        // err
+        this.closeModal();
+      }
+    },
+    closeModal() {
+      this.dialogOrder = {};
+      this.showOrder = false;
     },
     async searchHandle() {
       this.isSearched = true;
