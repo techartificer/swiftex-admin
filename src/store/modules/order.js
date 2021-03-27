@@ -8,8 +8,14 @@ export default {
     setOrders(state, payload) {
       state.orders = payload;
     },
-    addOrderStatus(state, payload) {
-      console.log(payload);
+    updateOrder(state, payload) {
+      const index = state.orders.findIndex((o) => o.id === payload.id);
+      console.log(payload, index);
+      if (index >= 0) {
+        const orders = state.orders.splice(0);
+        orders[index] = payload;
+        setImmediate(() => { state.orders = orders; });
+      }
     },
   },
   actions: {
@@ -17,7 +23,7 @@ export default {
       try {
         const body = { ...payload, admin: rootState?.admin?.profile?.id };
         const { data } = await instance.patch(`/order/add/order-status/${payload.id}`, body);
-        commit('addOrderStatus', data.data);
+        commit('updateOrder', data.data);
         return data.data;
       } catch (err) {
         return Promise.reject(err);

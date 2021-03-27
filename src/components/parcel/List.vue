@@ -53,7 +53,7 @@
                   <div> Address: {{ dialogOrder.recipientCity }} </div>
                   <div> Number of Items: {{ dialogOrder.numberOfItems }} </div>
                   <div> Delivery Time: {{ dialogOrder.requestedDeliveryTime }} </div>
-                  <div> Due: {{ dialogOrder.price }} </div>
+                  <div> Payable: {{ dialogOrder.price }} </div>
                 </div>
               </div>
 
@@ -413,6 +413,8 @@ export default {
     closeModal() {
       this.dialogOrder = {};
       this.showOrder = false;
+      this.riderHub = null;
+      this.selectedRider = null;
     },
     async searchHandle() {
       this.isSearched = true;
