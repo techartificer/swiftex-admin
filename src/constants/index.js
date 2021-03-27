@@ -30,4 +30,14 @@ module.exports = {
     'Mirpur',
     'Bashundhara R/A',
   ],
+  ORDER_STATUS: {
+    CREATED: 'Created',
+    DELIVERED: 'Delivered',
+    ACCEPTED: 'Accepted',
+    PENDING: 'Pending',
+    DECLINED: 'Declined',
+    IN_TRANSIT: 'IN_TRANSIT',
+    RETURNED: 'Returned',
+    RESCHEDULED: 'Rescheduled',
+  },
 };

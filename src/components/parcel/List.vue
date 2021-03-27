@@ -15,24 +15,49 @@
           </v-card-title>
           <v-card-text>
             <div v-if=" dialogOrder && dialogOrder.shop">
-              Status: {{ dialogOrder.currentStatus }}
-              Shop Name: {{ dialogOrder.shop.name }}
-              Pickup area: {{ dialogOrder.shop.pickupArea }}
-              Address: {{ dialogOrder.shop.address }}
+              <div>
+                <v-row class="top-menu">
+                  <div>
+                    <v-btn color="blue" dark class="pa-2 ml-2"
+                    depressed> {{dialogOrder.deliveryType}} </v-btn>
 
-              Recipient Name: {{ dialogOrder.recipientName }}
-              Recipient Phone: {{ dialogOrder.recipientPhone }}
-              Recipient Area: {{ dialogOrder.recipientArea }}
-              Recipient Address: {{ dialogOrder.recipientCity }}
-              Recipient Name: {{ dialogOrder.recipientCity }}
-              Number of Items: {{ dialogOrder.numberOfItems }}
-              Parcel Type: {{ dialogOrder.percelType }}
-              Delivery Type: {{ dialogOrder.deliveryType }}
-              Payment: {{ dialogOrder.price }}
-              Payment Type: {{ dialogOrder.paymentStatus }}
-              Delivery Time: {{ dialogOrder.requestedDeliveryTime }}
+                    <v-btn color="teal" dark class="ml-2 pa-2"
+                    depressed> {{dialogOrder.percelType}} </v-btn>
+                    <v-btn color="red" dark class="ml-2 pa-2"
+                    depressed> {{dialogOrder.paymentStatus}} </v-btn>
+                    <v-btn color="primary" dark class="ml-2 pa-2"
+                    depressed> {{dialogOrder.trackId}} </v-btn>
+                  </div>
+                  <div class="selector">
+                    <v-select
+                    outlined
+                    dense
+                    v-model="currentStatus"
+                    single-line
+                    :items = "orderStatus"
+                    ></v-select>
+                  </div>
+                </v-row>
+              </div>
+              <div class="body-x">
+                <div>
+                  <div class="item-body"> From: {{ dialogOrder.shop.name }} </div>
+                  <div> Contact: {{  dialogOrder.shop.phone.substr(2) }} </div>
+                  <div> Pickup area: {{ dialogOrder.shop.pickupArea }} </div>
+                  <div> Address: {{ dialogOrder.shop.address }} </div>
+                </div>
+                <div class="recipient">
+                  <div class="item-body"> To: {{ dialogOrder.recipientName }} </div>
+                  <div> Phone: {{ dialogOrder.recipientPhone.substr(2) }} </div>
+                  <div> Area: {{ dialogOrder.recipientArea }} </div>
+                  <div> Address: {{ dialogOrder.recipientCity }} </div>
+                  <div> Number of Items: {{ dialogOrder.numberOfItems }} </div>
+                  <div> Delivery Time: {{ dialogOrder.requestedDeliveryTime }} </div>
+                  <div> Due: {{ dialogOrder.price }} </div>
+                </div>
+              </div>
 
-              <v-row class="mt-1">
+              <v-row class="mt-1" v-if="isValidStatus">
                 <v-col cols="md-4">
                   <v-autocomplete
                   outlined
@@ -280,9 +305,19 @@ export default {
     hubs: constants.COVERAGE_AREAS,
     selectedRider: null,
     riderHub: null,
+    orderStatus: Object.values(constants.ORDER_STATUS),
+    currentStatus: null,
   }),
   computed: {
     ...mapGetters(['Orders']),
+    isValidStatus() {
+      const { DELIVERED, DECLINED, CREATED } = constants.ORDER_STATUS;
+      const isExist = [DELIVERED, DECLINED, CREATED].includes(this.currentStatus);
+      if (this.currentStatus === null || isExist) {
+        return false;
+      }
+      return true;
+    },
     searchDisabled() {
       return !this.phone && !this.trackId && this.dates.length !== 2;
     },
@@ -350,14 +385,12 @@ export default {
     },
     async viewPercel(item) {
       try {
-        // TODO: isFetching loader in modal
-        this.showOrder = true;
         const shop = await this.SHOP_BY_ID(item.shopId);
+        this.showOrder = true;
         this.dialogOrder = item;
         this.dialogOrder.shop = shop;
-        console.log(this.dialogOrder);
+        this.currentStatus = this.dialogOrder.currentStatus || 'Created';
       } catch (err) {
-        // err
         this.closeModal();
       }
     },
@@ -434,5 +467,24 @@ export default {
 }
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
   opacity: 0;
+}
+.selector {
+  width: 200px;
+}
+.row.top-menu {
+    display: flex;
+    justify-content: space-between;
+}
+.body-x {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+.item-body {
+  color: black;
+  margin-bottom: 10px;
+}
+.recipient {
+    max-width: 380px;
 }
 </style>
