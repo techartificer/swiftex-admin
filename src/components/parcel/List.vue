@@ -75,14 +75,17 @@
                   label="Select Rider"
                   v-model="selectedRider"
                   item-text="name"
+                  item-value="id"
                   :items="riders"
                   ></v-autocomplete>
                 </v-col>
                 <v-col cols="md-2">
                   <v-btn
+                  :loading="isAssigining"
                   class="pa-5"
                   depressed
                   color="primary"
+                  @click="assignOrder"
                   >Assign</v-btn>
                 </v-col>
               </v-row>
@@ -309,6 +312,7 @@ export default {
     orderStatus: Object.values(constants.ORDER_STATUS),
     currentStatus: null,
     riders: [],
+    isAssigining: false,
   }),
   computed: {
     ...mapGetters(['Orders']),
@@ -350,7 +354,7 @@ export default {
         { text: 'Area', value: 'recipientArea' },
         { text: 'City', value: 'recipientCity' },
         { text: 'Price', value: 'price' },
-        { text: 'Type', value: 'parcelType' },
+        { text: 'Currnet Status', value: 'currentStatus' },
         { text: 'Delivery Type', value: 'deliveryType' },
         { text: '# of Items', value: 'numberOfItems' },
         { text: 'Delivered', value: 'deliverdAt' },
@@ -387,7 +391,21 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['ORDERS', 'SHOP_BY_ID', 'ADD_ORDER_STATUS', 'RIDERS_BY_HUB']),
+    ...mapActions(['ORDERS', 'SHOP_BY_ID', 'ADD_ORDER_STATUS', 'RIDERS_BY_HUB', 'ASSIGN_RIDER']),
+    async assignOrder() {
+      this.isAssigining = true;
+      try {
+        const payload = {
+          riderId: this.selectedRider,
+          orderId: this.dialogOrder?.id,
+        };
+        await this.ASSIGN_RIDER(payload);
+        this.$toast.success('Rider assigned successfully');
+      } catch (err) {
+        // err
+      }
+      this.isAssigining = false;
+    },
     async addOrderStatus() {
       if (this.currentStatus === this.dialogOrder.currentStatus
        || this.currentStatus === constants.ORDER_STATUS.CREATED) return;
@@ -397,13 +415,14 @@ export default {
           text: 'Test text',
           status: this.currentStatus,
         });
+        this.$toast.success('Order updated successfully');
       } catch (err) {
         // err
       }
     },
     async fetchRidersByHub() {
       try {
-        this.riders = await this.RIDERS_BY_HUB(this.riderHub);
+        if (this.riderHub) { this.riders = await this.RIDERS_BY_HUB(this.riderHub); }
       } catch (err) {
         // err
       }

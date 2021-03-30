@@ -10,7 +10,6 @@ export default {
     },
     updateOrder(state, payload) {
       const index = state.orders.findIndex((o) => o.id === payload.id);
-      console.log(payload, index);
       if (index >= 0) {
         const orders = state.orders.splice(0);
         orders[index] = payload;
@@ -19,6 +18,15 @@ export default {
     },
   },
   actions: {
+    async ASSIGN_RIDER({ commit }, payload = {}) {
+      try {
+        const { data } = await instance.post('/order/assign-rider/', payload);
+        commit('updateOrder', data?.data?.order);
+        return data.data;
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    },
     async ADD_ORDER_STATUS({ commit, rootState }, payload = {}) {
       try {
         const body = { ...payload, admin: rootState?.admin?.profile?.id };

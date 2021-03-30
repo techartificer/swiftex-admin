@@ -36,7 +36,7 @@ module.exports = {
     ACCEPTED: 'Accepted',
     PENDING: 'Pending',
     DECLINED: 'Declined',
-    IN_TRANSIT: 'IN_TRANSIT',
+    IN_TRANSIT: 'In Transit',
     RETURNED: 'Returned',
     RESCHEDULED: 'Rescheduled',
   },
