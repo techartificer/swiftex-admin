@@ -30,14 +30,18 @@ module.exports = {
     'Mirpur',
     'Bashundhara R/A',
   ],
-  ORDER_STATUS: {
+  paymentType: {
+    IN: 'IN',
+    OUT: 'OUT',
+  },
+  orderStatus: {
     CREATED: 'Created',
-    DELIVERED: 'Delivered',
     ACCEPTED: 'Accepted',
-    PENDING: 'Pending',
     DECLINED: 'Declined',
+    PENDING: 'Pending',
     IN_TRANSIT: 'In Transit',
     RETURNED: 'Returned',
     RESCHEDULED: 'Rescheduled',
+    DELIVERED: 'Delivered',
   },
 };

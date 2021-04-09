@@ -18,6 +18,17 @@ export default {
     },
   },
   actions: {
+    async DELIVER_PARCEL({ commit }, payload = {}) {
+      try {
+        const { orderId } = payload;
+        const { data } = await instance.post(`/order/deliver/${orderId}`, payload);
+        commit('updateOrder', data?.data?.order);
+        return data.data;
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    },
+
     async ASSIGN_RIDER({ commit }, payload = {}) {
       try {
         const { data } = await instance.post('/order/assign-rider/', payload);

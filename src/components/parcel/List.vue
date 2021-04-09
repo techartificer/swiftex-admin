@@ -309,7 +309,7 @@ export default {
     hubs: constants.COVERAGE_AREAS,
     selectedRider: null,
     riderHub: null,
-    orderStatus: Object.values(constants.ORDER_STATUS),
+    orderStatus: Object.values(constants.orderStatus),
     currentStatus: null,
     riders: [],
     isAssigining: false,
@@ -317,8 +317,10 @@ export default {
   computed: {
     ...mapGetters(['Orders']),
     isValidStatus() {
-      const { DELIVERED, DECLINED, CREATED } = constants.ORDER_STATUS;
-      const isExist = [DELIVERED, DECLINED, CREATED].includes(this.currentStatus);
+      const {
+        DELIVERED, DECLINED, CREATED, IN_TRANSIT,
+      } = constants.orderStatus;
+      const isExist = [DELIVERED, DECLINED, CREATED, IN_TRANSIT].includes(this.currentStatus);
       if (this.currentStatus === null || isExist) {
         return false;
       }
@@ -369,8 +371,9 @@ export default {
     });
   },
   watch: {
-    async currentStatus() {
-      await this.addOrderStatus();
+    async currentStatus(val) {
+      const { CREATED, IN_TRANSIT } = constants.orderStatus;
+      if (val !== CREATED && val !== IN_TRANSIT) { await this.addOrderStatus(); }
     },
     allEmpty(val) {
       if (val) {
@@ -391,7 +394,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['ORDERS', 'SHOP_BY_ID', 'ADD_ORDER_STATUS', 'RIDERS_BY_HUB', 'ASSIGN_RIDER']),
+    ...mapActions(['ORDERS', 'SHOP_BY_ID', 'ADD_ORDER_STATUS', 'RIDERS_BY_HUB', 'ASSIGN_RIDER', 'DELIVER_PARCEL']),
     async assignOrder() {
       this.isAssigining = true;
       try {
@@ -400,6 +403,8 @@ export default {
           orderId: this.dialogOrder?.id,
         };
         await this.ASSIGN_RIDER(payload);
+        this.currentStatus = constants.paymentType.IN_TRANSIT;
+        this.dialogOrder.currentStatus = constants.paymentType.IN_TRANSIT;
         this.$toast.success('Rider assigned successfully');
       } catch (err) {
         // err
@@ -408,14 +413,23 @@ export default {
     },
     async addOrderStatus() {
       if (this.currentStatus === this.dialogOrder.currentStatus
-       || this.currentStatus === constants.ORDER_STATUS.CREATED) return;
+       || this.currentStatus === constants.orderStatus.CREATED) return;
       try {
-        await this.ADD_ORDER_STATUS({
-          id: this.dialogOrder.id,
-          text: 'Test text',
-          status: this.currentStatus,
-        });
-        this.$toast.success('Order updated successfully');
+        if (this.currentStatus !== constants.orderStatus.DELIVERED) {
+          await this.ADD_ORDER_STATUS({
+            id: this.dialogOrder.id,
+            text: 'Test text',
+            status: this.currentStatus,
+          });
+          this.$toast.success('Order updated successfully');
+        } else {
+          await this.DELIVER_PARCEL({
+            orderId: this.dialogOrder.id,
+            payment: this.dialogOrder.price,
+            shopId: this.dialogOrder.shopId,
+          });
+          this.$toast.success('Order delivered successfully');
+        }
       } catch (err) {
         // err
       }

@@ -4,10 +4,11 @@
       cols="8"
       sm="10"
       md="4"
-      lg="4"
+      lg="3"
     >
-      <v-card ref="form" class="pa-10 mt-16" outlined>
+      <v-card ref="form" class="pa-10 mt-fix" outlined>
         <v-card-text>
+          <v-form lazy-validation autocomplete="off">
           <div class="login">
             <img src="../assets/logo.png" alt="logo" class="log-img">
           </div>
@@ -21,9 +22,10 @@
             outlined
             v-model="phone"
             :rules="[() => !!phone || 'This field is required', validatePhoneNumber]"
-            label="Phone"
+            placeholder="Phone"
             type="tel"
             required
+            id="txtUserName"
           ></v-text-field>
           <v-text-field
             autocomplete="off"
@@ -32,9 +34,10 @@
             outlined
             v-model="password"
             :rules="[() => !!password || 'This field is required']"
-            label="Password"
             type="password"
+            placeholder="Password"
             required
+            id="txtUserName"
             @keyup.enter="handleLogin"
           ></v-text-field>
           <div class="login">
@@ -46,6 +49,7 @@
             @click="handleLogin"
             >Login</v-btn>
           </div>
+          </v-form>
         </v-card-text>
       </v-card>
     </v-col>
@@ -78,6 +82,8 @@ export default {
       if (!isValid) return 'Phone number should be valid';
       return true;
     },
+  },
+  watch: {
   },
   methods: {
     ...mapActions(['ADMIN_LOGIN_REQUEST', 'REFRESH_TOKEN_REQUEST', 'LOGOUT_REQUEST']),
@@ -123,5 +129,11 @@ img.log-img {
     margin: 30px;
     margin-top: 10px;
     height: 70px;
+}
+.mt-fix {
+  margin-top: 17vh;
+}
+#txtPassword{
+    -webkit-text-security:disc;
 }
 </style>
