@@ -33,7 +33,7 @@ export default {
     requests() {
       return this.CashOutRequests?.map((r) => ({
         shopName: r.shop.name,
-        expiresAt: moment(new Date(r.trxCodeExpiresAt * 1000)).format('ddd, DD-MM-YYYY, MM:HH A'),
+        expiresAt: moment(new Date(r.trxCodeExpiresAt * 1000)).format('ddd, DD-MM-YYYY, HH:mm A'),
         ...r,
       }));
     },
@@ -43,9 +43,6 @@ export default {
   },
   methods: {
     ...mapActions(['CASH_OUT_REQUESTS']),
-    getDate(ts) {
-      return moment(new Date(ts)).format('DDD, dd-mm-yyyy, MM:HH A');
-    },
     async getCashOutRequests(lastId = '') {
       try {
         this.isLoading = true;

@@ -98,7 +98,7 @@ export default {
   methods: {
     ...mapActions(['MERCHANTS']),
     getDate(date) {
-      return moment(date).format('DD, MMM YYYY HH:MM A');
+      return moment(date).format('DD, MMM YYYY HH:mm A');
     },
     changeStatus(c, item) {
       console.log(c, item.id);
