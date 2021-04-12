@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.shadow-left {
+  box-shadow: 10px 0px 15px -10px #aaaaaa;
+}
