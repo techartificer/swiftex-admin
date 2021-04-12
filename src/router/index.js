@@ -51,11 +51,19 @@ const routes = [
       requiresAuth: true,
     },
   },
-  // {
-  //   path: '/*',
-  //   name: '404',
-  //   redirect: '/',
-  // },
+  {
+    path: '/payments',
+    name: 'Payments',
+    component: () => import('../views/Payment.vue'),
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
+    path: '/*',
+    name: '404',
+    redirect: '/',
+  },
 ];
 
 const router = new VueRouter({
