@@ -1,5 +1,5 @@
 <template>
-  <div class="pa-5">
+  <div>
     <v-data-table
     :loading="isLoading"
     :headers="headers"

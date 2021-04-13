@@ -4,7 +4,6 @@
     :loading="isLoading"
     :headers="headers"
     :items="Riders"
-    sort-by="calories"
     class="elevation-0"
     hide-default-footer
     :items-per-page="1000000"

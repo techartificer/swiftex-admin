@@ -4,7 +4,21 @@
     :items="requests"
     :items-per-page="10"
     :loading="isLoading"
-  ></v-data-table>
+  >
+  <template v-slot:top>
+        <v-toolbar
+          flat
+        >
+          <v-toolbar-title>Payments</v-toolbar-title>
+          <v-divider
+            class="mx-4"
+            inset
+            vertical
+          ></v-divider>
+          <v-spacer></v-spacer>
+        </v-toolbar>
+  </template>
+  </v-data-table>
 </template>
 <script>
 import moment from 'moment';
