@@ -110,6 +110,8 @@
         :loading="isInit"
         :items-per-page="1000000"
         hide-default-footer
+        show-select
+        v-model="selecedOrders"
       >
         <template v-slot:top>
         <v-toolbar
@@ -128,15 +130,7 @@
       outlined>
         <v-card-text>
           <v-row dense>
-            <v-col>
-              <v-text-field
-              v-model="phone"
-              single-line
-              outlined
-              dense
-              label="Phone"> </v-text-field>
-            </v-col>
-            <v-col>
+            <v-col lg="1" md="3" sm="12">
               <v-text-field
               v-model="trackId"
               single-line
@@ -144,7 +138,15 @@
               dense
               label="Track ID"> </v-text-field>
             </v-col>
-            <v-col>
+            <v-col lg="2" md="3" sm="12">
+              <v-text-field
+              v-model="phone"
+              single-line
+              outlined
+              dense
+              label="Phone"> </v-text-field>
+            </v-col>
+            <v-col lg="2" md="3" sm="12">
               <v-dialog
                 light
                 ref="dialog"
@@ -188,12 +190,32 @@
                 </v-date-picker>
               </v-dialog>
             </v-col>
-            <v-col cols="lg-4">
+            <v-col lg="2" md="3" sm="12">
+              <v-autocomplete
+              v-model="shopId"
+              :items="shops"
+              item-text="name"
+              item-value="id"
+              single-line
+              outlined
+              dense
+              label="Shop"> </v-autocomplete>
+            </v-col>
+            <v-col lg="2" md="3" sm="12">
+              <v-autocomplete
+              v-model="deliveryZone"
+              :items="thanas"
+              single-line
+              outlined
+              dense
+              label="Delivery Zone"> </v-autocomplete>
+            </v-col>
+            <v-col lg="3" md="3" sm="12">
                 <v-btn
                 :disabled="searchDisabled"
                 depressed
                 class="mr-1"
-                @click="searchHandle"
+                @click="searchHandle()"
                 :loading="searchInit"
                 color="primary">Search</v-btn>
                 <v-btn
@@ -270,6 +292,7 @@
       </v-data-table>
       <div class="text-center pt-2 mb-8">
         <v-btn
+        @click="loadMore()"
         :disabled="!hasMore"
         color="secondary"
         rounded
@@ -292,6 +315,7 @@ export default {
     AddParcel,
   },
   data: () => ({
+    selecedOrders: [],
     showOrder: false,
     showAddPercel: false,
     phone: '',
@@ -313,6 +337,10 @@ export default {
     currentStatus: null,
     riders: [],
     isAssigining: false,
+    shops: [],
+    shopId: '',
+    deliveryZone: '',
+    thanas: constants.thana,
   }),
   computed: {
     ...mapGetters(['Orders']),
@@ -327,10 +355,14 @@ export default {
       return true;
     },
     searchDisabled() {
-      return !this.phone && !this.trackId && this.dates.length !== 2;
+      return this.allEmpty;
     },
     allEmpty() {
-      return this.phone === '' && this.dates.length === 0 && this.trackId === '';
+      return !this.phone && this.dates.length === 0
+      && !this.trackId && !this.shopId && !this.deliveryZone;
+    },
+    isSelectedOrder() {
+      return Boolean(this.selecedOrders.length);
     },
     dateRangeText() {
       if (this.dates.length === 2) {
@@ -366,11 +398,15 @@ export default {
   },
   mounted() {
     this.intialize();
+    this.allShops();
     eventBus.$on(constants.events.SHOW_ADD_PERCEL_DIALOG, (flag) => {
       this.showAddPercel = flag;
     });
   },
   watch: {
+    selecedOrders(v) {
+      console.log(v);
+    },
     async currentStatus(val) {
       const { CREATED, IN_TRANSIT } = constants.orderStatus;
       if (val !== CREATED && val !== IN_TRANSIT) { await this.addOrderStatus(); }
@@ -394,7 +430,15 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['ORDERS', 'SHOP_BY_ID', 'ADD_ORDER_STATUS', 'RIDERS_BY_HUB', 'ASSIGN_RIDER', 'DELIVER_PARCEL']),
+    ...mapActions(['ORDERS', 'SHOP_BY_ID', 'ADD_ORDER_STATUS', 'RIDERS_BY_HUB',
+      'ASSIGN_RIDER', 'DELIVER_PARCEL', 'ALL_SHOPS_NAME']),
+    async allShops() {
+      try {
+        this.shops = await this.ALL_SHOPS_NAME();
+      } catch (err) {
+        //
+      }
+    },
     async assignOrder() {
       this.isAssigining = true;
       try {
@@ -461,9 +505,20 @@ export default {
       this.riderHub = null;
       this.selectedRider = null;
     },
-    async searchHandle() {
+    async loadMore() {
+      const len = this.Orders.length;
+      let lastId;
+      if (len) lastId = this.Orders[len - 1]?.id;
+      if (this.isSearched) {
+        this.searchHandle(lastId);
+      } else {
+        this.intialize(lastId);
+      }
+    },
+    async searchHandle(lastId = '') {
       this.isSearched = true;
       this.searchInit = true;
+      this.hasMore = true;
       try {
         let startDate;
         let endDate;
@@ -475,12 +530,16 @@ export default {
           startDate = new Date(startDateTS).setHours(0, 0, 0, 0);
           endDate = new Date(endDateTS).setHours(23, 59, 59);
         }
-        await this.ORDERS({
+        const orders = await this.ORDERS({
           phone: this.phone,
           trackId: this.trackId,
+          deliveryZone: this.deliveryZone,
+          shopId: this.shopId,
           startDate,
           endDate,
+          lastId,
         });
+        if (orders?.length < 15) this.hasMore = false;
       } catch (err) {
         // err
       }
@@ -490,14 +549,15 @@ export default {
       this.dates = [];
       this.phone = '';
       this.trackId = '';
-      if (this.isSearched) {
-        this.intialize();
-      }
+      this.shopId = '';
+      this.deliveryZone = '';
       this.isSearched = false;
     },
-    async intialize() {
+    async intialize(lastId = '') {
       try {
-        await this.ORDERS();
+        this.hasMore = true;
+        const orders = await this.ORDERS({ lastId });
+        if (orders.length < 15) this.hasMore = false;
       } catch (err) {
         // err
       }

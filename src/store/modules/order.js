@@ -5,8 +5,9 @@ export default {
     orders: [],
   },
   mutations: {
-    setOrders(state, payload) {
-      state.orders = payload;
+    setOrders(state, { makeEmpty, orders }) {
+      if (!state.orders || makeEmpty) state.orders = [];
+      state.orders = [...state.orders, ...orders];
     },
     updateOrder(state, payload) {
       const index = state.orders.findIndex((o) => o.id === payload.id);
@@ -51,13 +52,13 @@ export default {
     async ORDERS({ commit }, payload = {}) {
       try {
         const {
-          lastId = '', shopId = '', phone = '', trackId = '', startDate = '', endDate = '',
+          lastId = '', shopId = '', phone = '', trackId = '', startDate = '', endDate = '', deliveryZone = '',
         } = payload;
-        const limit = 10;
-        const query = `limit=${limit}&lastId=${lastId}&phone=${phone}&trackId=${trackId}&shopId=${shopId}`;
+        const limit = 15;
+        const query = `limit=${limit}&lastId=${lastId}&phone=${phone}&trackId=${trackId}&shopId=${shopId}&deliveryZone=${deliveryZone}`;
         const dateQuery = `&startDate=${startDate}&endDate=${endDate}`;
         const { data } = await instance.get(`/order?${query}${dateQuery}`);
-        commit('setOrders', data.data || []);
+        commit('setOrders', { orders: data.data || [], makeEmpty: !lastId });
         return data.data;
       } catch (err) {
         return Promise.reject(err);
