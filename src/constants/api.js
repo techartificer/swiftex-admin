@@ -1,4 +1,4 @@
-let baseURL = 'http://localhost:4141';
+let baseURL = 'https://api.freshagric.com';
 if (process.env.NODE_ENV === 'production') {
   baseURL = 'https://api.freshagric.com';
 }

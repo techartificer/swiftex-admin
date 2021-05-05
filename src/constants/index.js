@@ -44,7 +44,7 @@ module.exports = {
     RESCHEDULED: 'Rescheduled',
     DELIVERED: 'Delivered',
   },
-  thana: ['Adabor', 'Airport', 'Badda', 'Banani', 'Bangshal',
+  THANAS: ['Adabor', 'Airport', 'Badda', 'Banani', 'Bangshal',
     'Bhashantek', 'Cantonment', 'Chackbazar', 'Darussalam', 'Demra',
     'Dhanmondi', 'Gandaria', 'Gulshan', 'Hazaribag', 'Jatrabari',
     'Kadamtoli', 'Kafrul', 'Kalabagan', 'Kamrangirchar', 'Khilgaon',

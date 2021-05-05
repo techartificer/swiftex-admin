@@ -330,7 +330,7 @@ export default {
     searchInit: false,
     isSearched: false,
     dialogOrder: {},
-    hubs: constants.COVERAGE_AREAS,
+    hubs: constants.THANAS,
     selectedRider: null,
     riderHub: null,
     orderStatus: Object.values(constants.orderStatus),
@@ -340,7 +340,7 @@ export default {
     shops: [],
     shopId: '',
     deliveryZone: '',
-    thanas: constants.thana,
+    thanas: constants.THANAS,
   }),
   computed: {
     ...mapGetters(['Orders']),
