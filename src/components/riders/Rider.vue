@@ -20,6 +20,208 @@
             vertical
           ></v-divider>
           <v-spacer></v-spacer>
+          <v-spacer></v-spacer>
+          <v-dialog
+            v-model="dialog"
+            max-width="500px"
+            persistent
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                color="primary"
+                dark
+                class="mb-2"
+                v-bind="attrs"
+                v-on="on"
+              >
+                Add Rider
+              </v-btn>
+            </template>
+            <v-card>
+              <v-card-title>
+                <span class="headline">{{ formTitle }}</span>
+              </v-card-title>
+
+              <v-card-text>
+                <v-container>
+                  <v-row>
+                    <v-col
+                      cols="12"
+                      sm="6"
+                      md="6"
+                      class="pa-0"
+                    >
+                      <v-text-field
+                        ref="name"
+                        outlined
+                        dense
+                        v-model="name"
+                        :rules="[() => !!name || 'This field is required' ]"
+                        label="Name"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      sm="6"
+                      md="6"
+                      class="pa-0 pl-2"
+                    >
+                      <v-text-field
+                      ref="phone"
+                      outlined
+                      dense
+                      v-model="phone"
+                      label="Phone"
+                      :rules="[
+                        () => !!phone || 'This field is required',
+                        validatePhoneNumber
+                      ]"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      sm="6"
+                      md="6"
+                      class="pa-0"
+                    >
+                      <v-text-field
+                        ref="contact"
+                        outlined
+                        dense
+                        v-model="contact"
+                        :rules="[
+                          () => !!contact || 'This field is required',
+                          validateContactNumber
+                        ]"
+                        label="Emergency Contact"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      sm="6"
+                      md="6"
+                      class="pa-0 pl-2"
+                    >
+                      <v-text-field
+                        ref="nid"
+                        outlined
+                        :rules="[() => !!nid || 'This field is required' ]"
+                        dense
+                        v-model="nid"
+                        label="NID"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      sm="6"
+                      md="6"
+                      class="pa-0"
+                    >
+                      <v-text-field
+                      ref="salary"
+                      outlined
+                      :rules="[() => !!salary || 'This field is required' ]"
+                      dense
+                      v-model="salary"
+                      label="Salary"
+                      type="number"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      sm="6"
+                      md="6"
+                      class="pa-0 pl-2"
+                    >
+                      <v-autocomplete
+                        ref="hub"
+                        autocomplete="off"
+                        outlined
+                        :rules="[() => !!hub || 'This field is required' ]"
+                        dense
+                        v-model="hub"
+                        :items="thanas"
+                        label="Hub"
+                      ></v-autocomplete>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      sm="6"
+                      md="6"
+                      class="pa-0"
+                    >
+                      <v-text-field
+                        ref="password"
+                        autocomplete="off"
+                        :rules="[() => !!password || 'This field is required' ]"
+                        outlined
+                        dense
+                        v-model="password"
+                        label="Password"
+                        type="password"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      sm="6"
+                      md="6"
+                      class="pa-0 pl-2"
+                    >
+                      <v-textarea
+                        autocomplete="off"
+                        outlined
+                        dense
+                        v-model="remark"
+                        label="Remark"
+                        rows="1"
+                        auto-grow
+                        ref="remark"
+                      ></v-textarea>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      sm="12"
+                      md="12"
+                      class="pa-0"
+                    >
+                      <v-textarea
+                        autocomplete="off"
+                        outlined
+                        :rules="[() => !!address || 'This field is required' ]"
+                        dense
+                        v-model="address"
+                        label="Address"
+                        rows="2"
+                        auto-grow
+                        ref="address"
+                      ></v-textarea>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-card-text>
+
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                  color="primary"
+                  text
+                  rounded
+                  @click="closeDialog()"
+                >
+                  Cancel
+                </v-btn>
+                <v-btn
+                  color="secondary"
+                  depressed
+                  rounded
+                  @click="addRider()"
+                  :loading="isAdding"
+                >
+                  Add
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-toolbar>
       </template>
       <template v-slot:item.createdAt="{ item }">
@@ -67,13 +269,28 @@
 <script>
 import moment from 'moment';
 import { mapActions, mapGetters } from 'vuex';
+import { formatNumber } from '../../helpers/phoneNumber';
+import constants from '../../constants';
 
 export default {
   data: () => ({
+    formTitle: 'Add Rider',
     editedItem: {},
     isLoading: true,
     isLoadingMore: false,
     disableLoadMore: false,
+    thanas: constants.THANAS,
+    name: '',
+    phone: '',
+    hub: '',
+    contact: '',
+    password: '',
+    remark: '',
+    address: '',
+    salary: '',
+    nid: '',
+    dialog: false,
+    isAdding: false,
   }),
   computed: {
     ...mapGetters(['Riders']),
@@ -94,12 +311,68 @@ export default {
         { text: 'Actions', value: 'actions', sortable: false },
       ];
     },
+    validatePhoneNumber() {
+      const { isValid } = formatNumber(`+88${this.phone}`);
+      if (!isValid) return 'Phone number should be valid';
+      return true;
+    },
+    validateContactNumber() {
+      const { isValid } = formatNumber(`+88${this.contact}`);
+      if (!isValid) return 'Phone number should be valid';
+      return true;
+    },
+    form() {
+      return {
+        name: this.name,
+        phone: `88${this.phone}`,
+        hub: this.hub,
+        contact: `88${this.contact}`,
+        password: this.password,
+        remark: this.remark,
+        address: this.address,
+        salary: +this.salary,
+        nid: this.nid,
+      };
+    },
   },
   created() {
     this.initialize();
   },
   methods: {
-    ...mapActions(['RIDERS']),
+    ...mapActions(['RIDERS', 'ADD_RIDER']),
+    resetForm() {
+      Object.keys(this.form).forEach((f) => {
+        if (this.$refs[f]) { this.$refs[f].reset(); }
+      });
+    },
+    validdateForm() {
+      let isValid = true;
+      Object.keys(this.form).forEach((f) => {
+        if (!this.form[f]) isValid = false;
+        this.$refs[f].validate(true);
+      });
+      return isValid;
+    },
+    closeDialog() {
+      this.resetForm();
+      this.dialog = false;
+    },
+    async addRider() {
+      const isValid = this.validdateForm();
+      if (!isValid) return;
+      const { isValid: isValidPhone } = formatNumber(`+88${this.contact}`);
+      const { isValid: isValidContact } = formatNumber(`+88${this.contact}`);
+      if (!isValidPhone || !isValidContact) return;
+      this.isAdding = true;
+      try {
+        await this.ADD_RIDER(this.form);
+        this.$toast.success('New Rider added successfully');
+        this.closeDialog();
+      } catch (err) {
+        // err
+      }
+      this.isAdding = false;
+    },
     getDate(date) {
       return moment(date).format('DD, MMM YYYY HH:mm A');
     },
@@ -111,9 +384,6 @@ export default {
       this.isLoadingMore = true;
       const id = this.Riders[this.Riders?.length - 1]?.id;
       this.initialize(id);
-    },
-    viewMerchant(merchant) {
-      console.log(merchant);
     },
     async initialize(lastId = '') {
       try {

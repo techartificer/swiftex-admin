@@ -8,6 +8,9 @@ export default {
     setRiders(state, payload) {
       state.riders = payload;
     },
+    addNewRider(state, payload) {
+      state.riders.unshift(payload);
+    },
     addRiders(state, payload) {
       state.riders = [...state.riders, ...payload];
     },
@@ -32,6 +35,16 @@ export default {
         return data.data;
       } catch (err) {
         return Promise.reject(err);
+      }
+    },
+    async ADD_RIDER({ commit }, payload = {}) {
+      try {
+        const { data } = await instance.post('rider/create', payload);
+        console.log(data);
+        commit('addNewRider', data.data);
+        return data.data;
+      } catch (err) {
+        return err;
       }
     },
   },
