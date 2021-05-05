@@ -5,7 +5,9 @@
   "scripts": {
     "serve": "vue-cli-service serve --port 8079",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "deploy:prod": "chmod +x ./deploy/prod.sh && ./deploy/prod.sh",
+    "deploy:stage": "chmod +x ./deploy/stage.sh && ./deploy/stage.sh"
   },
   "dependencies": {
     "@tailwindcss/postcss7-compat": "^2.0.2",
