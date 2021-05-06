@@ -1,6 +1,29 @@
 <template>
-  <v-card flat>
-    <v-card-text>
+  <v-card flat class="mx-auto">
+    <v-card-title>Add Percel</v-card-title>
+    <v-card-text class="center">
+      <div class="head mt-6">
+        <v-file-input
+        label="Import from file"
+        outlined
+        dense
+        disabled
+        ></v-file-input>
+        <v-autocomplete
+        class="pl-2"
+        v-model="shopId"
+        :items="AllShops"
+        item-value="id"
+        item-text="name"
+        outlined
+        dense
+        single-line
+        label="Select Shop"
+        clearable
+        ></v-autocomplete>
+      </div>
+    </v-card-text>
+    <v-card-text v-if="shopId && !imported">
       <div
       class="create-shop"
       >
@@ -21,15 +44,6 @@
               :rules="[() => !!name || 'This field is required' ]"
               outlined>
               </v-text-field>
-              <v-autocomplete
-              :rules="[() => !!pickupArea || 'This field is required' ]"
-              ref="pickHub"
-              :items="coverageAreas"
-              outlined
-              v-model="pickupArea"
-              dense
-              label="Pickup area"
-            ></v-autocomplete>
             <v-autocomplete
               ref="paymentStatus"
               :rules="[() => !!paymentStatus || 'This field is required' ]"
@@ -42,11 +56,11 @@
             <v-autocomplete
               ref="recipientArea"
               :rules="[() => !!deliveryZone || 'This field is required' ]"
-              :items="coverageAreas"
+              :items="thanas"
               outlined
               v-model="deliveryZone"
               dense
-              label="Delivery Zone"
+              label="Delivery Thana"
             ></v-autocomplete>
             <v-text-field
               :rules="[
@@ -54,15 +68,13 @@
               ]"
               ref="price"
               v-model="price"
-              label="Price"
+              label="Collectable Amount"
               type="number"
               dense
               outlined>
             </v-text-field>
             <v-text-field
-              :rules="[
-                () => !!totalNumberOfItems || 'This field is required'
-              ]"
+              v-if="showMore"
               ref="numberOfItems"
               v-model="totalNumberOfItems"
               label="Total Number of Items"
@@ -71,15 +83,8 @@
               outlined>
             </v-text-field>
             <v-textarea
-              :rules="[() => !!pickAddress || 'This field is required' ]"
-              ref="pickAddress"
-              outlined
-              v-model="pickAddress"
-              dense
-              rows="1"
-              auto-grow
-              label="Pick Address"> </v-textarea>
-            <v-textarea
+              v-if="showMore"
+              :rules="[() => true]"
               ref="comments"
               outlined
               v-model="comments"
@@ -100,43 +105,6 @@
               dense
               outlined>
               </v-text-field>
-              <v-text-field
-              ref="recipientCity"
-              :rules="[() => !!city || 'This field is required']"
-              v-model="city"
-              label="City"
-              dense
-              type="city"
-              outlined>
-              </v-text-field>
-              <v-text-field
-              :rules="[() => !!thana || 'This field is required' ]"
-              ref="recipientThana"
-              v-model="thana"
-              label="Delivery Thana"
-              type="text"
-              dense
-              outlined>
-              </v-text-field>
-              <v-text-field
-              :rules="[
-                () => !!zip || 'This field is required'
-              ]"
-              ref="recipientZip"
-              v-model="zip"
-              label="Zip"
-              dense
-              outlined>
-            </v-text-field>
-            <v-autocomplete
-              :rules="[() => !!percelType || 'This field is required' ]"
-              ref="percelType"
-              :items="percelTypes"
-              outlined
-              v-model="percelType"
-              dense
-              label="Parcel type"
-            ></v-autocomplete>
             <v-autocomplete
               :rules="[() => !!deliveryType || 'This field is required' ]"
               ref="deliveryType"
@@ -156,16 +124,46 @@
               auto-grow
               label="Recipient Address"> </v-textarea>
               <v-text-field
-              ref="packageCode"
-              v-model="packageCode"
-              label="Package code"
+              :rules="[() => !!weight || 'This field is required']"
+              ref="weight"
+              v-model="weight"
+              label="Weight (kg)"
               dense
+              type="number"
               outlined>
             </v-text-field>
+              <v-textarea
+              v-if="showMore"
+              ref="pickAddress"
+              outlined
+              v-model="pickAddress"
+              dense
+              rows="1"
+              auto-grow
+              label="Pick Address"> </v-textarea>
+            <v-autocomplete
+              v-if="showMore"
+              ref="percelType"
+              :items="percelTypes"
+              outlined
+              v-model="percelType"
+              dense
+              label="Parcel type"
+            ></v-autocomplete>
             </v-col>
           </v-row>
           </v-card-text>
           <v-card-actions>
+            <v-btn
+            text
+            ripple
+            rounded
+            color="primary"
+            @click="showMore=!showMore"
+            >
+              {{showMore ? 'Show Less' : 'Show More'}}
+              <v-icon> {{showMore ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+             </v-btn>
             <v-spacer></v-spacer>
             <v-btn
             text
@@ -179,7 +177,7 @@
             @click="handleAction"
             :loading="isLoading"
             >
-            Create
+            {{parcel ? 'Update' : 'Create'}}
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -187,20 +185,26 @@
   </v-card>
 </template>
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import constants from '../../constants';
 import eventBus from '../../helpers/eventBus';
 import { formatNumber } from '../../helpers/phoneNumber';
 
 export default {
   data: () => ({
+    shopId: '',
+    imported: false,
+    parcel: null,
+    weight: '',
+    showMore: false,
+    thanas: constants.THANAS,
     thana: '',
-    city: '',
+    city: 'Dhaka',
     phone: '',
     recipientArea: '',
     recipientName: '',
     name: '',
-    percelType: '',
+    percelType: 'Product',
     recipientAddress: '',
     deliveryType: '',
     zip: '',
@@ -215,8 +219,14 @@ export default {
     isLoading: false,
   }),
   computed: {
+    ...mapGetters(['AllShops']),
     coverageAreas() {
       return constants.COVERAGE_AREAS;
+    },
+    selectedShop() {
+      const idx = this.AllShops?.findIndex((s) => s.id === this.shopId);
+      if (idx < 0) return null;
+      return this.AllShops[idx];
     },
     percelTypes() {
       return ['Documents', 'Products'];
@@ -235,22 +245,19 @@ export default {
     form() {
       return {
         deliveryType: this.deliveryType,
-        numberOfItems: this.totalNumberOfItems,
-        percelType: this.percelType,
         paymentStatus: this.paymentStatus,
-        pickAddress: this.pickAddress,
-        pickHub: this.pickupArea,
         recipientAddress: this.recipientAddress,
         recipientArea: this.deliveryZone,
-        recipientCity: this.city,
         recipientName: this.name,
         recipientPhone: this.phone,
-        recipientThana: this.thana,
-        recipientZip: this.zip,
-        comments: this.comments,
         price: this.price,
-        packageCode: this.packageCode,
+        weight: this.weight,
       };
+    },
+  },
+  watch: {
+    selectedShop(val) {
+      console.log(val);
     },
   },
   methods: {
@@ -274,10 +281,21 @@ export default {
       try {
         const { isValid, number } = formatNumber(`+88${this.form?.recipientPhone}`);
         if (validForm && isValid) {
-          this.form.numberOfItems = Number(this.form.numberOfItems);
-          this.form.price = Number(this.form.price);
-          this.form.recipientPhone = number;
-          await this.ORDER_CREATE(this.form);
+          const data = {
+            ...this.form,
+            percelType: this.percelType,
+            pickAddress: this.pickAddress || this.selectedShop?.pickupAddress,
+            pickHub: this.pickupArea || this.selectedShop?.pickupArea,
+            recipientCity: this.city,
+            recipientThana: this.deliveryZone,
+            recipientZip: this.zip,
+            price: Number(this.form.price),
+            recipientPhone: number,
+            weight: Number(this.form.weight),
+            comments: this.comments,
+            totalNumberOfItems: +this.totalNumberOfItems,
+          };
+          await this.ORDER_CREATE({ percel: data, shopId: this.shopId });
           this.resetForm();
           this.$toast.success('Order created successfully');
         }
@@ -304,5 +322,21 @@ export default {
 .card-border {
   border-color: #c83843;
   border-width: 1px;
+}
+.head {
+    width: 700px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: stretch;
+    justify-content: space-between;
+    border: 1px solid;
+    padding: 20px 10px 0px 10px;
+    color: #c83843;
+    border-radius: 4px;
+}
+.v-card__text.center {
+    display: flex;
+    justify-content: center;
 }
 </style>

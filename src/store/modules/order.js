@@ -17,6 +17,9 @@ export default {
         setImmediate(() => { state.orders = orders; });
       }
     },
+    addOrders(state, data) {
+      state.orders = [data, ...state.orders];
+    },
   },
   actions: {
     async DELIVER_PARCEL({ commit }, payload = {}) {
@@ -29,7 +32,15 @@ export default {
         return Promise.reject(err);
       }
     },
-
+    async ORDER_CREATE({ commit }, { percel, shopId }) {
+      try {
+        const { data } = await instance.post(`/order/create/${shopId}`, percel);
+        commit('addOrders', data?.data);
+        return data?.data;
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    },
     async ASSIGN_RIDER({ commit }, payload = {}) {
       try {
         const { data } = await instance.post('/order/assign-rider/', payload);
