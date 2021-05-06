@@ -20,7 +20,6 @@
                   <div>
                     <v-btn color="blue" dark class="pa-2 ml-2"
                     depressed> {{dialogOrder.deliveryType}} </v-btn>
-
                     <v-btn color="teal" dark class="ml-2 pa-2"
                     depressed> {{dialogOrder.percelType}} </v-btn>
                     <v-btn color="red" dark class="ml-2 pa-2"
@@ -51,8 +50,8 @@
                   <div> Phone: {{ dialogOrder.recipientPhone.substr(2) }} </div>
                   <div> Area: {{ dialogOrder.recipientArea }} </div>
                   <div> Address: {{ dialogOrder.recipientCity }} </div>
-                  <div> Number of Items: {{ dialogOrder.numberOfItems }} </div>
-                  <div> Delivery Time: {{ dialogOrder.requestedDeliveryTime }} </div>
+                  <!-- <div> Number of Items: {{ dialogOrder.numberOfItems }} </div> -->
+                  <div> Delivery Time: {{ deliveryTime }} </div>
                   <div> Payable: {{ dialogOrder.price }} </div>
                 </div>
               </div>
@@ -106,7 +105,7 @@
       <v-data-table
         :headers="headers"
         :items="Orders"
-        class="elevation-0"
+        class="elevation-0 pa-2"
         :loading="isInit"
         :items-per-page="1000000"
         hide-default-footer
@@ -128,9 +127,9 @@
         <v-card
       class="mr-2 mb-8"
       outlined>
-        <v-card-text>
+        <v-card-text class="card-text">
           <v-row dense>
-            <v-col lg="1" md="3" sm="12">
+            <v-col lg="1" md="3" sm="12" cols="12">
               <v-text-field
               v-model="trackId"
               single-line
@@ -138,7 +137,7 @@
               dense
               label="Track ID"> </v-text-field>
             </v-col>
-            <v-col lg="2" md="3" sm="12">
+            <v-col lg="2" md="3" sm="12" cols="12">
               <v-text-field
               v-model="phone"
               single-line
@@ -146,7 +145,7 @@
               dense
               label="Phone"> </v-text-field>
             </v-col>
-            <v-col lg="2" md="3" sm="12">
+            <v-col lg="2" md="3" sm="12" cols="12">
               <v-dialog
                 light
                 ref="dialog"
@@ -190,7 +189,7 @@
                 </v-date-picker>
               </v-dialog>
             </v-col>
-            <v-col lg="2" md="3" sm="12">
+            <v-col lg="2" md="3" sm="12" cols="12">
               <v-autocomplete
               v-model="shopId"
               :items="shops"
@@ -201,7 +200,7 @@
               dense
               label="Shop"> </v-autocomplete>
             </v-col>
-            <v-col lg="2" md="3" sm="12">
+            <v-col lg="2" md="3" sm="12" cols="12" >
               <v-autocomplete
               v-model="deliveryZone"
               :items="thanas"
@@ -210,7 +209,7 @@
               dense
               label="Delivery Zone"> </v-autocomplete>
             </v-col>
-            <v-col lg="3" md="3" sm="12">
+            <v-col lg="3" md="3" sm="12" cols="12">
                 <v-btn
                 :disabled="searchDisabled"
                 depressed
@@ -230,6 +229,36 @@
                 color="primary">Add Parcel</v-btn>
             </v-col>
           </v-row>
+          <v-row v-if="isSelectedOrders">
+            <v-col lg="3" md="3" sm="12" cols="12">
+              <v-autocomplete
+              v-model="status"
+              outlined
+              dense
+              :items="orderStatus"
+              label="Status"
+              single-line
+              >
+              </v-autocomplete>
+            </v-col>
+            <v-col lg="3" md="3" sm="12" cols="12">
+              <v-textarea
+              label="Notes"
+              v-model="notes"
+              rows="1"
+              outlined
+              dense
+              auto-grow
+              single-line>
+              </v-textarea>
+            </v-col>
+            <v-col lg="3" md="3" sm="12" cols="12">
+              <v-btn
+                @click="changeStatus"
+                depressed
+                color="primary">Change Status</v-btn>
+            </v-col>
+          </v-row>
         </v-card-text>
       </v-card>
       </template>
@@ -241,7 +270,7 @@
             <template v-slot:activator="{ on, attrs }">
               <v-chip
                 small
-                @click="getColor"
+                @click="copyToClipboard(item)"
                 color="black"
                 dark
                 v-bind="attrs"
@@ -250,7 +279,7 @@
                 {{item.trackId}}
               </v-chip>
             </template>
-            <span>Track parcel</span>
+            <span>Copy</span>
           </v-tooltip>
         </template>
         <template v-slot:item.isAccepted="{ item }">
@@ -303,7 +332,7 @@
 </template>
 <script>
 /* eslint-disable vue/no-side-effects-in-computed-properties */
-
+import copy from 'copy-to-clipboard';
 import { mapActions, mapGetters } from 'vuex';
 import moment from 'moment';
 import AddParcel from './Add.vue';
@@ -342,9 +371,14 @@ export default {
     shopId: '',
     deliveryZone: '',
     thanas: constants.THANAS,
+    notes: '',
+    status: '',
   }),
   computed: {
     ...mapGetters(['Orders']),
+    isSelectedOrders() {
+      return !!this.selecedOrders.length;
+    },
     isValidStatus() {
       const {
         DELIVERED, DECLINED, CREATED, IN_TRANSIT,
@@ -396,6 +430,10 @@ export default {
         { text: 'Actions', value: 'actions' },
       ];
     },
+    deliveryTime() {
+      if (this.dialogOrder.deliveredAt) return moment(this.dialogOrder.deliveredAt).format('DD-MM-YY HH:mm A');
+      return 'Not delivered yet';
+    },
   },
   mounted() {
     this.intialize();
@@ -435,7 +473,27 @@ export default {
   },
   methods: {
     ...mapActions(['ORDERS', 'SHOP_BY_ID', 'ADD_ORDER_STATUS', 'RIDERS_BY_HUB',
-      'ASSIGN_RIDER', 'DELIVER_PARCEL', 'ALL_SHOPS_NAME']),
+      'ASSIGN_RIDER', 'DELIVER_PARCEL', 'ALL_SHOPS_NAME', 'CHANGE_MULTIPLE_STATUS']),
+    copyToClipboard(order) {
+      copy(`${order.trackId}`);
+      this.$toast('Copied to clipboard');
+    },
+    async changeStatus() {
+      if (!this.status) return;
+      const ids = this.selecedOrders?.map((o) => o.id);
+      const data = {
+        orderIds: ids,
+        text: this.notes,
+        status: this.status,
+      };
+      try {
+        await this.CHANGE_MULTIPLE_STATUS(data);
+        this.$toast.success('Parcels status updated successfully');
+      } catch (err) {
+        // err
+      }
+      console.log(data);
+    },
     async allShops() {
       try {
         this.shops = await this.ALL_SHOPS_NAME();
@@ -593,6 +651,9 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+.v-card__text.card-text {
+    // min-height: 168px;
+}
 .fade-enter-active {
   transition: opacity .5s;
 }

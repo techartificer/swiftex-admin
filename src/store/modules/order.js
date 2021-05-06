@@ -1,10 +1,30 @@
+/* eslint-disable no-unused-expressions */
 import instance from '../../helpers/axios';
+
+const exculdeData = (orderIds = [], notUpdated = []) => {
+  const orderIdsRet = orderIds.splice(0);
+  notUpdated.forEach(({ orderId: oid }) => {
+    const idx = orderIdsRet.findIndex((id) => id === oid);
+    if (idx >= 0) {
+      orderIdsRet.splice(idx, 1);
+    }
+  });
+  return orderIdsRet;
+};
 
 export default {
   state: {
     orders: [],
   },
   mutations: {
+    changeOrderStatus(state, { id, status }) {
+      const index = state.orders.findIndex((o) => o.id === id);
+      if (index >= 0) {
+        const orders = state.orders.splice(0);
+        orders[index] = { ...orders[index], currentStatus: status };
+        setImmediate(() => { state.orders = orders; });
+      }
+    },
     setOrders(state, { makeEmpty, orders }) {
       if (!state.orders || makeEmpty) state.orders = [];
       state.orders = [...state.orders, ...orders];
@@ -82,6 +102,17 @@ export default {
         commit('setOrders', { orders: data.data || [], makeEmpty: !lastId });
         return data.data;
       } catch (err) {
+        return Promise.reject(err);
+      }
+    },
+    async CHANGE_MULTIPLE_STATUS({ commit }, payload = { orderIds: [], text: '', status: '' }) {
+      try {
+        const { data } = await instance.patch('/order/change/status/', payload);
+        data?.data.forEach((order) => commit('updateOrder', order));
+        return data?.data;
+      } catch (err) {
+        const updated = exculdeData(payload.orderIds, err?.response?.data?.data);
+        updated?.forEach((id) => commit('changeOrderStatus', { id, status: payload.status }));
         return Promise.reject(err);
       }
     },
