@@ -1,27 +1,42 @@
 <template>
   <v-card flat class="mx-auto">
-    <v-card-title>Add Percel</v-card-title>
+    <v-card-title>{{parcel ? 'Update' : 'Add'}} Percel</v-card-title>
     <v-card-text class="center">
-      <div class="head mt-6">
-        <v-file-input
-        label="Import from file"
-        outlined
-        dense
-        disabled
-        ></v-file-input>
-        <v-autocomplete
-        class="pl-2"
-        v-model="shopId"
-        :items="AllShops"
-        item-value="id"
-        item-text="name"
-        outlined
-        dense
-        single-line
-        label="Select Shop"
-        clearable
-        ></v-autocomplete>
-      </div>
+      <v-card flat
+      outlined
+      width="700"
+      class="mx-auto card-border">
+        <v-card-text>
+          <div class="head mt-6">
+          <v-file-input
+          label="Import from file"
+          outlined
+          dense
+          disabled
+          ></v-file-input>
+          <v-autocomplete
+          class="pl-2"
+          v-model="shopId"
+          :items="AllShops"
+          item-value="id"
+          item-text="name"
+          outlined
+          dense
+          single-line
+          label="Select Shop"
+          clearable
+          ></v-autocomplete>
+        </div>
+        </v-card-text>
+        <v-card-actions v-if="!shopId">
+          <v-spacer></v-spacer>
+          <v-btn text
+           color="secondary"
+           rounded
+           @click="closeAddPercel"
+           >Cancel</v-btn>
+        </v-card-actions>
+      </v-card>
     </v-card-text>
     <v-card-text v-if="shopId && !imported">
       <div
@@ -191,10 +206,10 @@ import eventBus from '../../helpers/eventBus';
 import { formatNumber } from '../../helpers/phoneNumber';
 
 export default {
+  props: ['parcel'],
   data: () => ({
     shopId: '',
     imported: false,
-    parcel: null,
     weight: '',
     showMore: false,
     thanas: constants.THANAS,
@@ -218,6 +233,29 @@ export default {
     packageCode: '',
     isLoading: false,
   }),
+  mounted() {
+    if (this.parcel) {
+      this.shopId = this.parcel?.shopId;
+      this.phone = this.parcel?.recipientPhone?.substr(2);
+      this.thana = this.parcel?.thana;
+      this.deliveryZone = this.parcel?.recipientArea;
+      this.deliveryType = this.parcel?.deliveryType;
+      this.name = this.parcel?.recipientName;
+      this.percelType = this.parcel?.percelType;
+      this.recipientAddress = this.parcel?.recipientAddress;
+      this.paymentStatus = this.parcel?.paymentStatus;
+      this.price = this.parcel?.price;
+      this.weight = this.parcel?.weight;
+      this.totalNumberOfItems = this.parcel?.numberOfItems;
+      this.comments = this.parcel?.comments;
+      this.percelType = this.parcel?.percelType;
+      this.pickAddress = this.parcel?.pickAddress;
+      const flag = this.parcel?.numberOfItems || this.parcel?.comments || this.parcel?.percelType !== 'Product';
+      if (flag) {
+        this.showMore = true;
+      }
+    }
+  },
   computed: {
     ...mapGetters(['AllShops']),
     coverageAreas() {
@@ -261,7 +299,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['ORDER_CREATE']),
+    ...mapActions(['ORDER_CREATE', 'UPDATE_ORDER']),
     validdateForm() {
       let isValid = true;
       Object.keys(this.form).forEach((f) => {
@@ -295,9 +333,15 @@ export default {
             comments: this.comments,
             totalNumberOfItems: +this.totalNumberOfItems,
           };
-          await this.ORDER_CREATE({ percel: data, shopId: this.shopId });
-          this.resetForm();
-          this.$toast.success('Order created successfully');
+          if (!this.parcel) {
+            await this.ORDER_CREATE({ percel: data, shopId: this.shopId });
+            this.resetForm();
+            this.$toast.success('Order created successfully');
+          } else if (this.parcel) {
+            await this.UPDATE_ORDER({ update: data, shopId: this.shopId, id: this.parcel.id });
+            this.$toast.success('Order updated successfully');
+            this.closeAddPercel();
+          }
         }
       } catch (err) {
         // console.log(err);
@@ -305,6 +349,9 @@ export default {
       this.isLoading = false;
     },
     closeAddPercel() {
+      this.resetForm();
+      this.shopId = '';
+      console.log(eventBus);
       eventBus.$emit(constants.events.SHOW_ADD_PERCEL_DIALOG, false);
     },
   },
@@ -324,16 +371,11 @@ export default {
   border-width: 1px;
 }
 .head {
-    width: 700px;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     align-content: stretch;
     justify-content: space-between;
-    border: 1px solid;
-    padding: 20px 10px 0px 10px;
-    color: #c83843;
-    border-radius: 4px;
 }
 .v-card__text.center {
     display: flex;

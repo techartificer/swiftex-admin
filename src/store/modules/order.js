@@ -22,6 +22,16 @@ export default {
     },
   },
   actions: {
+    async UPDATE_ORDER({ commit }, payload = {}) {
+      try {
+        const { id, update, shopId } = payload;
+        const { data } = await instance.patch(`/order/id/${id}/shopId/${shopId}`, update);
+        commit('updateOrder', data.data);
+        return data.data;
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    },
     async DELIVER_PARCEL({ commit }, payload = {}) {
       try {
         const { orderId } = payload;

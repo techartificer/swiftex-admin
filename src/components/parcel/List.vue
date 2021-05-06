@@ -1,7 +1,7 @@
 <template>
   <div>
     <transition name="fade">
-      <add-parcel v-if="showAddPercel"/>
+      <add-parcel :parcel="parcel" v-if="showAddPercel"/>
     </transition>
     <template v-if="!showAddPercel">
       <v-dialog
@@ -315,6 +315,7 @@ export default {
     AddParcel,
   },
   data: () => ({
+    parcel: null,
     selecedOrders: [],
     showOrder: false,
     showAddPercel: false,
@@ -400,6 +401,9 @@ export default {
     this.intialize();
     this.allShops();
     eventBus.$on(constants.events.SHOW_ADD_PERCEL_DIALOG, (flag) => {
+      if (!flag) {
+        this.parcel = null;
+      }
       this.showAddPercel = flag;
     });
   },
@@ -438,6 +442,11 @@ export default {
       } catch (err) {
         //
       }
+    },
+    editItem(item) {
+      console.log(item);
+      this.parcel = item;
+      this.showAddPercel = true;
     },
     async assignOrder() {
       this.isAssigining = true;
