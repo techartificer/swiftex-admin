@@ -60,6 +60,14 @@ const routes = [
     },
   },
   {
+    path: '/shops',
+    name: 'Shops',
+    component: () => import('../views/Shops.vue'),
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
     path: '/*',
     name: '404',
     redirect: '/',

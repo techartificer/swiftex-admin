@@ -3,7 +3,8 @@ import instance from '../../helpers/axios';
 export default {
   state: {
     shop: {},
-    allShops: [],
+    allShops: [], // all created shops list with name, id
+    shopList: [], // created shops list
   },
   mutations: {
     setShop(state, payload) {
@@ -11,6 +12,13 @@ export default {
     },
     setAllShops(state, payload = []) {
       state.allShops = payload;
+    },
+    addShops(state, { list = [], makeEmpty }) {
+      if (makeEmpty) {
+        state.shopList = [];
+      }
+      state.shopList = state.shopList || [];
+      state.shopList = [...state.shopList, ...list];
     },
   },
   actions: {
@@ -33,9 +41,19 @@ export default {
         return Promise.reject(err);
       }
     },
+    async SHOP_LIST({ commit }, { lastId = '' }) {
+      try {
+        const { data } = await instance.get(`/shop/all-shops?lastId=${lastId}`);
+        commit('addShops', { list: data.data || [], makeEmpty: !lastId });
+        return data.data;
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    },
   },
   getters: {
     Shop: (state) => state.shop,
     AllShops: (state) => state.allShops,
+    ShopList: (state) => state.shopList,
   },
 };

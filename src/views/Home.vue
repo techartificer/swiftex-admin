@@ -1,7 +1,7 @@
 <template>
   <div>
     <Login v-if="!IsLoggedIn"/>
-    <Dashboard />
+    <Dashboard v-else/>
   </div>
 </template>
 

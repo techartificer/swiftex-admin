@@ -27,7 +27,7 @@ instance.interceptors.response.use(undefined, async (err) => {
   const title = err?.response?.data?.title;
   const code = err?.response?.data?.code;
   if (code === constants.errorCodes.LOGGED_OUT) {
-    Vue.$toast.error(title?.substr(0, 1)?.toUpperCase() + title.substr(1));
+    Vue.$toast.error(title);
     store.commit('CLEAR_AUTH_DATA');
     window.location.replace('/');
   } else {
@@ -41,7 +41,7 @@ instance.interceptors.response.use(undefined, async (err) => {
     if (title === 'signature is invalid') {
       Vue.$toast.error('Please login again');
     }
-    Vue.$toast.error(title?.substr(0, 1)?.toUpperCase() + title.substr(1));
+    Vue.$toast.error(title);
   }
   return Promise.reject(err);
 });

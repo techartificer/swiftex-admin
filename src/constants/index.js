@@ -1,6 +1,7 @@
 // eslint-disable-next-line
 const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 module.exports = {
+  DELIVERY_CHARGE: 60,
   errorCodes: {
     LOGGED_OUT: '404002',
     EXPIRED_JWT: '401005',
