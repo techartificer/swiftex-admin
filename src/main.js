@@ -1,14 +1,13 @@
 /* eslint-disable no-param-reassign */
 import Vue from 'vue';
-import constants from '@/constants';
 import Toast from 'vue-toastification';
 import instance from '@/helpers/axios';
+import constants from './constants';
 import vuetify from './plugins/vuetify';
 import App from './App.vue';
 import router from './router';
 import store from './store';
 import 'vue-toastification/dist/index.css';
-import validateToken from './helpers/jwt';
 
 const options = {
   transition: 'Vue-Toastification__bounce',
@@ -21,35 +20,28 @@ Vue.use(Toast, options);
 
 Vue.config.productionTip = false;
 
-instance.interceptors.request.use(async (config) => {
-  try {
-    const authToken = config?.headers?.authorization;
-    if (authToken) {
-      const isExpired = validateToken(authToken);
-      if (isExpired) {
-        console.log(store);
-        const { accessToken, refreshToken } = await store.dispatch('REFRESH_TOKEN_REQUEST');
-        config.headers.authorization = accessToken;
-        config.headers.RefreshToken = refreshToken;
-        return config;
-      }
-    }
-    return config;
-  } catch (err) {
-    console.error(err);
-    return Promise.reject(err);
-  }
-}, undefined);
+instance.interceptors.request.use((config) => config, undefined);
 
-instance.interceptors.response.use(undefined, (err) => {
+instance.interceptors.response.use(undefined, async (err) => {
+  const originalRequest = err.config;
   const title = err?.response?.data?.title;
   const code = err?.response?.data?.code;
   if (code === constants.errorCodes.LOGGED_OUT) {
-    Vue.$toast.error(title);
+    Vue.$toast.error(title?.substr(0, 1)?.toUpperCase() + title.substr(1));
     store.commit('CLEAR_AUTH_DATA');
     window.location.replace('/');
   } else {
-    Vue.$toast.error(title);
+    if (code === constants.errorCodes.EXPIRED_JWT && !originalRequest.retry) {
+      const { accessToken, refreshToken } = await store.dispatch('REFRESH_TOKEN_REQUEST');
+      originalRequest.headers.authorization = accessToken;
+      originalRequest.headers.RefreshToken = refreshToken;
+      originalRequest.retry = true;
+      return instance(originalRequest);
+    }
+    if (title === 'signature is invalid') {
+      Vue.$toast.error('Please login again');
+    }
+    Vue.$toast.error(title?.substr(0, 1)?.toUpperCase() + title.substr(1));
   }
   return Promise.reject(err);
 });

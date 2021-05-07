@@ -1,6 +1,7 @@
 import axios from 'axios';
 import instance from '../../helpers/axios';
 import { baseURL } from '../../constants/api';
+import constants from '../../constants';
 
 export default {
   state: {
@@ -52,6 +53,11 @@ export default {
         commit('SET_AUTH_DATA', data?.data);
         return data?.data;
       } catch (err) {
+        const code = err?.response?.data?.code;
+        if (code === constants.errorCodes.LOGGED_OUT) {
+          commit('CLEAR_AUTH_DATA');
+          window.location.replace('/');
+        }
         return Promise.reject(err);
       }
     },
