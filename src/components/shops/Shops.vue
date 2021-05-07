@@ -19,6 +19,39 @@
             vertical
           ></v-divider>
           <v-spacer></v-spacer>
+          <v-dialog v-model="dialog"
+          width="300"
+          persistent>
+            <v-card>
+              <v-card-title>
+                Update
+              </v-card-title>
+              <v-card-text class="mt-5">
+                <v-text-field
+                v-model="deliveryCharge"
+                label="Delivery Charge"
+                outlined
+                dense
+                type="number"></v-text-field>
+                <v-text-field
+                v-model="cod"
+                label="COD Charge"
+                outlined
+                dense
+                type="number"></v-text-field>
+                <v-select
+                outlined
+                dense
+                :items="statuses"
+                v-model="status"></v-select>
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn text rounded
+                @click="dialog=false">Cancel</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-toolbar>
       </template>
       <template v-slot:item.actions="{ item }">
@@ -48,6 +81,11 @@ import constants from '../../constants';
 export default {
   data() {
     return {
+      cod: '',
+      status: '',
+      statuses: ['Active', 'Deactive'],
+      deliveryCharge: '',
+      dialogItem: null,
       disableLoadMore: false,
       isLoadingMore: false,
       dialog: false,
@@ -65,6 +103,7 @@ export default {
         { text: 'Phone', value: 'phone' },
         { text: 'Address', value: 'pickupAddress' },
         { text: 'Charge', value: 'deliveryCharge' },
+        { text: 'COD%', value: 'cod' },
         { text: 'Status', value: 'status' },
         { text: 'Actions', value: 'actions', sortable: false },
       ],
@@ -84,9 +123,13 @@ export default {
     this.getShops();
   },
   methods: {
-    ...mapActions(['SHOP_LIST']),
+    ...mapActions(['SHOP_LIST', 'UPDATE_SHOP_BY_ID']),
     editItem(item) {
-      console.log(item);
+      this.dialogItem = item;
+      this.status = item.status;
+      this.deliveryCharge = item.deliveryCharge;
+      this.cod = item.cod;
+      this.dialog = true;
     },
     loadMore() {
       this.isLoadingMore = true;
@@ -107,6 +150,13 @@ export default {
       }
       this.isLoading = false;
       this.isLoadingMore = false;
+    },
+    async updateShop() {
+      try {
+        await this.UPDATE_SHOP_BY_ID({ shopId: this.dialogItem.id });
+      } catch (err) {
+        // err
+      }
     },
   },
 };
