@@ -59,7 +59,7 @@ export default {
     },
     async UPDATE_SHOP_BY_ID({ commit }, { shopId, update }) {
       try {
-        const { data } = await instance.patch(`/id/${shopId}/`, update);
+        const { data } = await instance.patch(`/shop/id/${shopId}/`, update);
         commit('updateShop', data.data);
         return data.data;
       } catch (err) {

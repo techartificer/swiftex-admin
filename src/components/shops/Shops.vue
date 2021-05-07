@@ -23,8 +23,8 @@
           width="300"
           persistent>
             <v-card>
-              <v-card-title>
-                Update
+              <v-card-title v-if="dialogItem">
+                {{dialogItem.name}}
               </v-card-title>
               <v-card-text class="mt-5">
                 <v-text-field
@@ -49,18 +49,26 @@
                 <v-spacer></v-spacer>
                 <v-btn text rounded
                 @click="dialog=false">Cancel</v-btn>
+                <v-btn
+                :loading="isUpdating"
+                @click="updateShop"
+                color="secondary"
+                rounded>
+                  Update
+                </v-btn>
               </v-card-actions>
             </v-card>
           </v-dialog>
         </v-toolbar>
       </template>
       <template v-slot:item.actions="{ item }">
-        <v-icon
+        <v-btn @click="editItem(item)" fab x-small text>
+          <v-icon
           class="ml-2"
-          @click="editItem(item)"
         >
           mdi-pencil
         </v-icon>
+        </v-btn>
       </template>
     </v-data-table>
     <div class="load-more">
@@ -81,11 +89,12 @@ import constants from '../../constants';
 export default {
   data() {
     return {
+      isUpdating: false,
       cod: '',
       status: '',
       statuses: ['Active', 'Deactive'],
       deliveryCharge: '',
-      dialogItem: null,
+      dialogItem: {},
       disableLoadMore: false,
       isLoadingMore: false,
       dialog: false,
@@ -153,10 +162,20 @@ export default {
     },
     async updateShop() {
       try {
-        await this.UPDATE_SHOP_BY_ID({ shopId: this.dialogItem.id });
+        this.isUpdating = true;
+        await this.UPDATE_SHOP_BY_ID({
+          shopId: this.dialogItem.id,
+          update: {
+            deliveryCharge: +this.deliveryCharge,
+            cod: +this.cod,
+            status: this.status,
+          },
+        });
+        this.dialog = false;
       } catch (err) {
-        // err
+        console.log(err);
       }
+      this.isUpdating = false;
     },
   },
 };

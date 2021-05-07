@@ -3,6 +3,23 @@
     <Navbar v-if="IsLoggedIn"/>
     <v-main>
       <v-container fluid class="pa-0">
+        <v-dialog width="600"
+        persistent
+        v-model="isLoggedOut">
+          <v-card>
+            <v-card-text>
+              <div class="loggedOut">
+                You are logged out
+              </div>
+              <div class="btn-reload">
+                <v-btn
+                color="secondary"
+                @click="reload"
+                >Reload</v-btn>
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
         <router-view></router-view>
       </v-container>
     </v-main>
@@ -20,7 +37,15 @@ export default {
     Navbar,
   },
   computed: {
-    ...mapGetters(['AccessToken', 'RefreshToken', 'IsLoggedIn']),
+    ...mapGetters(['AccessToken', 'RefreshToken', 'IsLoggedIn', 'ShowLoggedOut']),
+    isLoggedOut: {
+      get() {
+        return this.ShowLoggedOut;
+      },
+      set() {
+        // ignore
+      },
+    },
   },
   watch: {
     AccessToken(val) {
@@ -36,6 +61,24 @@ export default {
   },
   methods: {
     ...mapActions(['REFRESH_TOKEN_REQUEST']),
+    reload() {
+      window.location.reload();
+    },
   },
 };
 </script>
+<style scoped>
+.loggedOut {
+    padding: 70px;
+    text-align: center;
+    font-size: 2rem !important;
+    font-weight: 500;
+    letter-spacing: 0.05em !important;
+    line-height: 2rem;
+    text-transform: uppercase;
+    font-family: "Roboto", sans-serif !important;
+}
+.btn-reload {
+    text-align: center;
+}
+</style>

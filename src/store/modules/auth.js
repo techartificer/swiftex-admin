@@ -8,6 +8,8 @@ export default {
     accessToken: localStorage.getItem('accessToken'),
     refreshToken: localStorage.getItem('refreshToken'),
     permission: localStorage.getItem('permission'),
+    timeOutId: null,
+    showLoggedOut: false,
   },
   mutations: {
     SET_AUTH_DATA(state, { accessToken, refreshToken, permission }) {
@@ -19,6 +21,12 @@ export default {
         state.permission = permission;
         localStorage.setItem('permission', permission);
       }
+      if (state.timeOutId) {
+        clearTimeout(state.timeOutId);
+      }
+      state.timeOutId = setTimeout(() => {
+        state.showLoggedOut = true;
+      }, 1000 * 60 * 30 + 10);
     },
     CLEAR_AUTH_DATA(state) {
       state.accessToken = null;
@@ -77,5 +85,6 @@ export default {
     AccessToken: (state) => state.accessToken,
     RefreshToken: (state) => state.refreshToken,
     Permission: (state) => state.permission,
+    ShowLoggedOut: (state) => state.showLoggedOut,
   },
 };
