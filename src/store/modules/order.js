@@ -40,6 +40,9 @@ export default {
     addOrders(state, data) {
       state.orders = [data, ...state.orders];
     },
+    appendOrders(state, data = []) {
+      state.orders = [...data, ...state.orders];
+    },
   },
   actions: {
     async UPDATE_ORDER({ commit }, payload = {}) {
@@ -113,6 +116,15 @@ export default {
       } catch (err) {
         const updated = exculdeData(payload.orderIds, err?.response?.data?.data);
         updated?.forEach((id) => commit('changeOrderStatus', { id, status: payload.status }));
+        return Promise.reject(err);
+      }
+    },
+    async CREATE_MULTIPLE_ORDERS({ commit }, { shopId = '', orders = {} }) {
+      try {
+        const { data } = await instance.post(`/order/create/${shopId}/multiples/`, { orders });
+        commit('appendOrders', data.data || []);
+        return data.data;
+      } catch (err) {
         return Promise.reject(err);
       }
     },

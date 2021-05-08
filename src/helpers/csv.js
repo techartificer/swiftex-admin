@@ -1,6 +1,5 @@
 import papa from 'papaparse';
 
-// eslint-disable-next-line no-unused-vars
 const parse = (file) => new Promise((resolve, reject) => {
   papa.parse(file, {
     download: true,

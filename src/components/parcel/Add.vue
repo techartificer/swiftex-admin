@@ -309,10 +309,17 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['ORDER_CREATE', 'UPDATE_ORDER']),
-    multipleOrderAddHandle() {
+    ...mapActions(['ORDER_CREATE', 'UPDATE_ORDER', 'CREATE_MULTIPLE_ORDERS']),
+    async multipleOrderAddHandle() {
       const orders = this.parseData(this.validOrders || []);
-      console.log(orders);
+      try {
+        await this.CREATE_MULTIPLE_ORDERS({ shopId: this.shopId, orders });
+        this.file = null;
+        this.shopId = null;
+        this.$toast.success('Orders added successfully');
+      } catch (err) {
+        // err
+      }
     },
     validdateForm() {
       let isValid = true;
