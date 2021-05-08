@@ -6,6 +6,18 @@ module.exports = {
     LOGGED_OUT: '404002',
     EXPIRED_JWT: '401005',
   },
+  deliveryType: {
+    REGULAR: 'Regular',
+    EXPRESS: 'Express',
+  },
+  parcelType: {
+    DOCUMENTS: 'Documents',
+    PRODUCTS: 'Products',
+  },
+  paymentStatus: {
+    COD: 'COD',
+    PAID: 'PAID',
+  },
   adminRoles: {
     SUPER_ADMIN: 'Super Admin',
     ADMIN: 'Admin',

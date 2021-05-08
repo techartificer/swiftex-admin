@@ -10,9 +10,11 @@
           <div class="head mt-6">
           <v-file-input
           label="Import from file"
+          single-line
           outlined
           dense
-          disabled
+          accept=".csv"
+          v-model="file"
           ></v-file-input>
           <v-autocomplete
           class="pl-2"
@@ -28,13 +30,21 @@
           ></v-autocomplete>
         </div>
         </v-card-text>
-        <v-card-actions v-if="!shopId">
+        <v-card-actions v-if="!shopId || imported">
           <v-spacer></v-spacer>
           <v-btn text
            color="secondary"
            rounded
            @click="closeAddPercel"
            >Cancel</v-btn>
+           <v-btn
+           v-if="imported && shopId"
+           :disabled="addOrderBtn"
+           color="secondary"
+           rounded
+           depressed
+           @click="multipleOrderAddHandle"
+           >Add Orders</v-btn>
         </v-card-actions>
       </v-card>
     </v-card-text>
@@ -204,10 +214,15 @@ import { mapActions, mapGetters } from 'vuex';
 import constants from '../../constants';
 import eventBus from '../../helpers/eventBus';
 import { formatNumber } from '../../helpers/phoneNumber';
+import importFromCSV from '../../mixins/importFromCSV';
 
 export default {
+  mixins: [importFromCSV],
   props: ['parcel'],
   data: () => ({
+    validOrders: null,
+    addOrderBtn: true,
+    file: null,
     shopId: '',
     imported: false,
     weight: '',
@@ -293,13 +308,12 @@ export default {
       };
     },
   },
-  watch: {
-    selectedShop(val) {
-      console.log(val);
-    },
-  },
   methods: {
     ...mapActions(['ORDER_CREATE', 'UPDATE_ORDER']),
+    multipleOrderAddHandle() {
+      const orders = this.parseData(this.validOrders || []);
+      console.log(orders);
+    },
     validdateForm() {
       let isValid = true;
       Object.keys(this.form).forEach((f) => {
@@ -351,7 +365,7 @@ export default {
     closeAddPercel() {
       this.resetForm();
       this.shopId = '';
-      console.log(eventBus);
+      this.file = null;
       eventBus.$emit(constants.events.SHOW_ADD_PERCEL_DIALOG, false);
     },
   },

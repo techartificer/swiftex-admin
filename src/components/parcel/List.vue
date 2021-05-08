@@ -446,9 +446,6 @@ export default {
     });
   },
   watch: {
-    selecedOrders(v) {
-      console.log(v);
-    },
     async currentStatus(val) {
       const { CREATED, IN_TRANSIT } = constants.orderStatus;
       if (val !== CREATED && val !== IN_TRANSIT) { await this.addOrderStatus(); }
