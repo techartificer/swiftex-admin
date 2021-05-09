@@ -17,13 +17,15 @@ export default {
     orders: [],
   },
   mutations: {
-    changeOrderStatus(state, { id, status }) {
-      const index = state.orders.findIndex((o) => o.id === id);
-      if (index >= 0) {
-        const orders = state.orders.splice(0);
-        orders[index] = { ...orders[index], currentStatus: status };
-        setImmediate(() => { state.orders = orders; });
-      }
+    changeOrderStatus(state, { data = [], status }) {
+      data.forEach(({ id }) => {
+        const index = state.orders.findIndex((o) => o.id === id);
+        if (index >= 0) {
+          const orders = state.orders.splice(0);
+          orders[index] = { ...orders[index], currentStatus: status };
+          state.orders = orders;
+        }
+      });
     },
     setOrders(state, { makeEmpty, orders }) {
       if (!state.orders || makeEmpty) state.orders = [];
@@ -42,6 +44,16 @@ export default {
     },
     appendOrders(state, data = []) {
       state.orders = [...data, ...state.orders];
+    },
+    updateMultipleOrders(state, data = []) {
+      data.forEach((order) => {
+        const index = state.orders.findIndex((o) => o.id === order.id);
+        if (index >= 0) {
+          const orders = state.orders.splice(0);
+          orders[index] = order;
+          state.orders = orders;
+        }
+      });
     },
   },
   actions: {
@@ -111,11 +123,11 @@ export default {
     async CHANGE_MULTIPLE_STATUS({ commit }, payload = { orderIds: [], text: '', status: '' }) {
       try {
         const { data } = await instance.patch('/order/change/status/', payload);
-        data?.data.forEach((order) => commit('updateOrder', order));
+        commit('updateMultipleOrders', data?.data);
         return data?.data;
       } catch (err) {
         const updated = exculdeData(payload.orderIds, err?.response?.data?.data);
-        updated?.forEach((id) => commit('changeOrderStatus', { id, status: payload.status }));
+        commit('changeOrderStatus', { status: payload.status, data: updated });
         return Promise.reject(err);
       }
     },
